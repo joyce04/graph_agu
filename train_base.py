@@ -53,7 +53,7 @@ if __name__ == '__main__':
     torch.manual_seed(args.seed)
     device = device_setup()
 
-    with open('./results/nc_base_{}_{}_{}_es_{}.csv'.format(args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a') as file:
+    with open('./results/nc_base_{}_{}_{}_es_{}.csv'.format(args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
         file.write('"' + str(args) + '"' + '\n')
         file.write('run, epoch, train F1 avg, validation F1 avg, test F1 avg\n')
 

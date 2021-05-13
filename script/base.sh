@@ -4,7 +4,7 @@ tmux send-keys "conda activate ocean_g" C-m
 
 code=train_base.py
 dataset=cora
-config=gcn_base.json
+config=./configs/gcn_base.json
 tmux send-keys "python $code --config $config & wait" C-m
 
 train_ratio=0.03
