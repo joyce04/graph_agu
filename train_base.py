@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 import random
-
+import sys
 from torch.optim import Adam
 
 from eval import validate, evaluate, evaluate_sage, validate_sage
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     device = device_setup()
 
     with open('./results/nc_base_{}_{}_{}_es_{}.csv'.format(args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
-        file.write('"' + str(args) + '"' + '\n')
+        file.write(','.join(map(lambda x: x + ':' + str(vars(args)[x]), vars(args).keys())) + '\n')
         file.write('run, epoch, train F1 avg, validation F1 avg, test F1 avg\n')
 
         val_f1_list = []
