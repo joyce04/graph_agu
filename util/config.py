@@ -16,8 +16,10 @@ def get_configs(args):
     if args.data_split is None:
         args.data_split = config['data_split']
     if args.data_split == 'random':
-        args.train_ratio = config['subset_params']['train_ratio']
-        args.edge_split = config['subset_params']['edge_split']
+        if args.train_ratio is None:
+            args.train_ratio = config['subset_params']['train_ratio']
+        if args.edge_split is None:
+            args.edge_split = config['subset_params']['edge_split']
 
     if args.epochs is None:
         args.epochs = config['epochs']
