@@ -4,9 +4,8 @@ import numpy as np
 import torch
 from torch.optim import Adam
 
-from eval import validate, evaluate, evaluate_sage, validate_sage
+from eval import validate, evaluate
 from gnn.clf import generate_node_clf
-# from gnn.sage import generate_sage_loader
 from util.config import get_arguments, device_setup
 from util.data import dataset_split
 from util.tool import EarlyStopping
@@ -19,28 +18,6 @@ def train(data, model, optimizer):
     loss = model.loss(out[data.train_mask == 1], data.y[data.train_mask == 1])
     loss.backward()
     optimizer.step()
-    return loss
-
-
-def train_sage(train_loader, model, optimizer):
-    total_loss = total_correct = 0
-    for batch_size, n_id, adjs in train_loader:
-        optimizer.zero_grad()
-
-        adjs = [adj.to(device) for adj in adjs]
-        out = model(data.x[n_id], adjs)
-        labels = data.y[n_id][:batch_size]
-        if labels.size(0) == 1:
-            loss = model.loss(out, labels)
-        else:
-            loss = model.loss(out, labels.squeeze())
-        loss.backward()
-        optimizer.step()
-
-        total_loss += float(loss)
-        total_correct += int(out.argmax(dim=-1).eq(labels).sum())
-
-    loss = total_loss / len(train_loader)
     return loss
 
 
@@ -66,10 +43,6 @@ if __name__ == '__main__':
             num_feats = data.x.shape[1]
             num_nd_classes = np.max(data.y.numpy()) + 1
 
-            # if args.gnn == 'graphsage':
-            #     BATCH_SIZE = 20
-            #     train_loader, subgraph_loader = generate_sage_loader(data.train_index, data.train_mask, num_nodes, BATCH_SIZE)
-
             data.x = data.x.to(device)
             model = generate_node_clf(args.gnn, num_feats, num_nd_classes, device)
             optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
@@ -81,19 +54,12 @@ if __name__ == '__main__':
 
             for epoch in range(args.epochs):
                 model.initialize()
-                # if args.gnn == 'graphsage':
-                #     train_loss = train_sage(train_loader, model, optimizer)
-                #     val_loss = validate_sage(data, model, subgraph_loader, device)
-                # else:
                 train_loss = train(data, model, optimizer)
                 val_loss = validate(data, model)
 
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
                 if lowest_val_loss > val_loss or epoch == args.epochs - 1:
                     lowest_val_loss = val_loss
-                    # if args.gnn == 'graphsage':
-                    #     evals = evaluate_sage(model, data, subgraph_loader, device)
-                    # else:
                     evals = evaluate(model, data)
                     best_val = evals['val_f1']
                     best_test = evals['test_f1']
