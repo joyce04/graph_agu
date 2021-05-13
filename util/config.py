@@ -36,6 +36,17 @@ def get_configs(args):
         args.weight_decay = config['weight_decay']
     if args.patience is None:
         args.patience = config['patience']
+
+    if args.aug_type is None:
+        args.aug_type = config['aug_type']
+    if args.aug_type == 'flag':
+        if args.m is None:
+            args.m = config['flag_params']['m']
+        if args.step_size is None:
+            args.step_size = config['flag_params']['step_size']
+        if args.cr is None:
+            args.cr = config['flag_params']['cr']
+
     return args
 
 
@@ -53,6 +64,11 @@ def get_arguments():
     parser.add_argument('--learning_rate', type=float, help='learning rate')
     parser.add_argument('--weight_decay', type=float, help='weight decay')
     parser.add_argument('--patience', type=int, help='patience for early stopping')
+    parser.add_argument('--aug_type', help='augmentation type')
+    parser.add_argument('--m', type=int, help='Number of flag iteration')
+    parser.add_argument('--step_size', type=float, help='flag step size')
+    parser.add_argument('--cr', type=bool, help='To apply CR to flag augmentation or not')
+
     args = parser.parse_args()
     args = get_configs(args)
     return args

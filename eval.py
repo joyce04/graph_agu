@@ -1,6 +1,6 @@
 import torch
 from torch.nn import functional as F
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score
 
 
 @torch.no_grad()
@@ -19,7 +19,7 @@ def validate_sage(data, model, subgraph_loader, device):
     return model.loss(out[data.val_mask == 1], data.y[data.val_mask == 1])
 
 
-def evaluate_f1(data, out):
+def evaluate_metrics(data, out):
     outputs = {}
     for key in ['train', 'val', 'test']:
         mask = data['{}_mask'.format(key)]
@@ -28,6 +28,7 @@ def evaluate_f1(data, out):
 
         outputs['{}_loss'.format(key)] = loss
         outputs['{}_f1'.format(key)] = f1_score(data.y[mask == 1], pred.data.numpy(), average='micro')
+        outputs['{}_acc'.format(key)] = accuracy_score(data.y[mask == 1], pred.data.numpy())
     return outputs
 
 
@@ -36,7 +37,7 @@ def evaluate(model, data):
     model.evaluate()
     out = model(data.x, data.train_index)
 
-    return evaluate_f1(data, out)
+    return evaluate_metrics(data, out)
 
 
 @torch.no_grad()
@@ -44,4 +45,4 @@ def evaluate_sage(model, data, subgraph_loader, device):
     model.evaluate()
     out = model.gnn_model.inference(data.x, subgraph_loader, device)
 
-    return evaluate_f1(data, out)
+    return evaluate_metrics(data, out)

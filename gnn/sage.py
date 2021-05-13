@@ -66,3 +66,10 @@ def generate_sage_loader(edge_index, train_mask, num_nodes, batch_size):
     subgraph_loader = NeighborSampler(edge_index, node_idx=None, sizes=[-1],
                                       batch_size=batch_size, shuffle=False)
     return train_loader, subgraph_loader
+
+
+def get_train_unlabeled_adj(data):
+    unlabeled_nodes = ((data.val_mask | data.test_mask) == False) #TODO include train_mask?
+    train_loader = NeighborSampler(data.train_index, node_idx=unlabeled_nodes, num_nodes=data.num_nodes,
+                                   sizes=[25, 10], batch_size=unlabeled_nodes.shape[0], shuffle=True)
+    return [u_adjs for _, _, u_adjs in train_loader][0]

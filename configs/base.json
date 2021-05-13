@@ -7,7 +7,8 @@
     "edge_split": true,
     "train_ratio": 0.01
   },
-  "gnn": "gcn",
+  "aug_type": "none",
+  "gnn": "graphsage",
   "epochs": 150,
   "learning_rate": 0.003,
   "weight_decay": 0.0005,

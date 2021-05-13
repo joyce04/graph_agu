@@ -184,6 +184,7 @@ def get_graph(data, edges):
 
 def build_graph(data, data_split):
     if data_split in ['public', 'full']:
+        data.edge_index = data.train_index
         g = to_networkx(data, to_undirected=True)
     else:
         g = get_graph(data, data.train_index.T.numpy())
