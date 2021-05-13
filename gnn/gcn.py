@@ -29,6 +29,7 @@ class GCN(nn.Module):
         # last layer
         self.gcns.append(GCNConv(hi_dim, out_dim))
         self.dropout = dropout
+        self.reset_parameters()
 
     def reset_parameters(self):
         for gcn in self.gcns:

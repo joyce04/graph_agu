@@ -1,5 +1,4 @@
 from torch import nn as nn
-from torch.optim import Adam
 
 from gnn.gat import GAT
 from gnn.gcn import GCN

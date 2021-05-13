@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
-from torch_geometric.nn import SAGEConv
 import torch.nn.functional as F
 from torch_geometric.data import NeighborSampler
+from torch_geometric.nn import SAGEConv
 
 """
 references :
@@ -57,3 +57,12 @@ class SAGE(nn.Module):
             x_all = torch.cat(xs, dim=0)
 
         return x_all
+
+
+def generate_sage_loader(edge_index, train_mask, num_nodes, batch_size):
+    train_loader = NeighborSampler(edge_index, node_idx=train_mask, num_nodes=num_nodes,
+                                   sizes=[25, 10], batch_size=batch_size, shuffle=True)
+    # full graph for evaluation
+    subgraph_loader = NeighborSampler(edge_index, node_idx=None, sizes=[-1],
+                                      batch_size=batch_size, shuffle=False)
+    return train_loader, subgraph_loader

@@ -7,7 +7,7 @@ from sklearn.metrics import f1_score
 def validate(data, model):
     model.evaluate()
 
-    out = model(data.x, data.edge_index)
+    out = model(data.x, data.train_index)
     return model.loss(out[data.val_mask == 1], data.y[data.val_mask == 1])
 
 
@@ -34,7 +34,7 @@ def evaluate_f1(data, out):
 @torch.no_grad()
 def evaluate(model, data):
     model.evaluate()
-    out = model(data.x, data.edge_index)
+    out = model(data.x, data.train_index)
 
     return evaluate_f1(data, out)
 
