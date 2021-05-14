@@ -20,6 +20,8 @@ def get_configs(args):
             args.train_ratio = config['subset_params']['train_ratio']
         if args.edge_split is None:
             args.edge_split = config['subset_params']['edge_split']
+    else:
+        args.edge_split = False
 
     if args.epochs is None:
         args.epochs = config['epochs']
