@@ -11,12 +11,12 @@ def validate(data, model):
     return model.loss(out[data.val_mask == 1], data.y[data.val_mask == 1])
 
 
-@torch.no_grad()
-def validate_sage(data, model, subgraph_loader, device):
-    model.evaluate()
-
-    out = model.gnn_model.inference(data.x, subgraph_loader, device)
-    return model.loss(out[data.val_mask == 1], data.y[data.val_mask == 1])
+# @torch.no_grad()
+# def validate_sage(data, model, subgraph_loader, device):
+#     model.evaluate()
+#
+#     out = model.gnn_model.inference(data.x, subgraph_loader, device)
+#     return model.loss(out[data.val_mask == 1], data.y[data.val_mask == 1])
 
 
 def evaluate_metrics(data, out):
@@ -40,9 +40,9 @@ def evaluate(model, data):
     return evaluate_metrics(data, out)
 
 
-@torch.no_grad()
-def evaluate_sage(model, data, subgraph_loader, device):
-    model.evaluate()
-    out = model.gnn_model.inference(data.x, subgraph_loader, device)
-
-    return evaluate_metrics(data, out)
+# @torch.no_grad()
+# def evaluate_sage(model, data, subgraph_loader, device):
+#     model.evaluate()
+#     out = model.gnn_model.inference(data.x, subgraph_loader, device)
+#
+#     return evaluate_metrics(data, out)

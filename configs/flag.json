@@ -1,0 +1,21 @@
+{
+  "data_loc": "./dataset/",
+  "dataset": "cora",
+  "seed": 1,
+  "data_split": "random",
+  "subset_params": {
+    "edge_split": true,
+    "train_ratio": 0.01
+  },
+  "gnn": "graphsage",
+  "epochs": 150,
+  "learning_rate": 0.003,
+  "weight_decay": 0.0005,
+  "patience": 10,
+  "aug_type": "flag",
+  "flag_params": {
+    "m": 3,
+    "step_size": 1e-3,
+    "cr": false
+  }
+}
