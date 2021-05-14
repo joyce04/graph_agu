@@ -2,9 +2,9 @@ tmux new -s base_aug -d
 tmux send-keys "source ~/.bashrc" C-m
 tmux send-keys "conda activate ocean_g" C-m
 
-code=train_base.py
+code=train_de.py
 dataset=cora
-config=./configs/base.json
+config=./configs/de.json
 tmux send-keys "python $code --config $config --train_ratio 0.01 & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.03 & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.05 & wait" C-m

@@ -1,0 +1,20 @@
+{
+  "data_loc": "./dataset/",
+  "dataset": "cora",
+  "seed": 1,
+  "data_split": "random",
+  "subset_params": {
+    "edge_split": true,
+    "train_ratio": 0.01
+  },
+  "gnn": "gcn",
+  "epochs": 150,
+  "learning_rate": 0.003,
+  "weight_decay": 0.0005,
+  "patience": 10,
+  "aug_type": "drop_edge",
+  "de_params": {
+    "de_sampling_percent": 0.7,
+    "de_normalization": "FirstOrderGCN"
+  }
+}

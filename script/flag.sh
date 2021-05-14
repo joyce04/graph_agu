@@ -19,8 +19,6 @@ tmux send-keys "python $code --config $config --train_ratio 0.45 & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.5 & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.55 & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.6 & wait" C-m
-tmux send-keys "python $code --config $config --data_split public & wait" C-m
-tmux send-keys "python $code --config $config --data_split full & wait" C-m
 
 edge_split=false
 tmux send-keys "python $code --config $config --train_ratio 0.01 --edge_split $edge_split & wait" C-m
@@ -55,8 +53,6 @@ tmux send-keys "python $code --config $config --train_ratio 0.45 --cr $cr & wait
 tmux send-keys "python $code --config $config --train_ratio 0.5 --cr $cr & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.55 --cr $cr & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.6 --cr $cr & wait" C-m
-tmux send-keys "python $code --config $config --data_split public --cr $cr & wait" C-m
-tmux send-keys "python $code --config $config --data_split full --cr $cr & wait" C-m
 
 edge_split=false
 tmux send-keys "python $code --config $config --train_ratio 0.01 --edge_split $edge_split --cr $cr & wait" C-m
