@@ -19,7 +19,7 @@ def apply(model_forward, data, optimizer, device, args):
 
     out = forward(perturb)
 
-    condition = (data.ul_train_mask | data.train_mask) == 1
+    condition = torch.bitwise_or(data.ul_train_mask, data.train_mask)
     pred_label = out.detach()[condition]
     loss = model.loss(out[train_idx], data.y[train_idx]) / m
 
