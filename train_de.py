@@ -48,7 +48,6 @@ if __name__ == '__main__':
 
         for r in range(10):
             dataset, data = dataset_split(args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split)
-            num_nodes = data.x.shape[0]
             num_feats = data.x.shape[1]
             num_nd_classes = np.max(data.y.numpy()) + 1
 

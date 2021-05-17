@@ -1,5 +1,4 @@
 import copy
-import os
 import pickle
 
 import numpy as np
@@ -7,7 +6,7 @@ import torch
 from scipy import sparse as sp
 
 from gaug.util import scipysp_to_pytorchsp
-from gaug.vae import VGAE, pretrain_ep_net
+from gaug.vae import pretrain_ep_net, VGAE
 from util.graph import csr_to_edgelist
 
 
@@ -15,7 +14,6 @@ class GAug:
     def __init__(self, pretrain):
         self.gae = True
         self.pretrain = pretrain
-        self.pretrained_edges = None
         self.updated_edges = None
         self.ep_net = None
 
@@ -56,14 +54,13 @@ class GAug:
         adj_pred = adj_pred + adj_pred.T
         return adj_pred
 
-    def get_pretrained_edges(self, data, file_loc):
+    def get_pretrained_edges(self, dataset, data, gaug_param):
         if self.pretrain:
-            A_pred = pickle.load(open(file_loc, 'rb'))
-            adj_pred = self.sample_graph_det(data.adj, A_pred, 50, 50)
-            self.pretrained_edges = csr_to_edgelist(adj_pred).type(torch.int64)
-            # TODO check accuracy of edges
+            A_pred = pickle.load(open(f'./gaug/edge_probabilities/{dataset}_graph_5_logits.pkl', 'rb'))
+            adj_pred = self.sample_graph_det(data.adj, A_pred, gaug_param['removal_rate'], gaug_param['add_rate'])
+            self.updated_edges = csr_to_edgelist(adj_pred).type(torch.int64)
 
-    def train_predict_edges(self, gaug_param, adj, feature, labels, device):
+    def train_predict_edges(self, adj, feature, labels, device, gaug_param):
         adj_matrix, adj_norm, adj_orig = self.preprocess_adj(adj)
         norm_w = adj_orig.shape[0] ** 2 / float((adj_orig.shape[0] ** 2 - adj_orig.sum()) * 2)
         pos_weight = torch.FloatTensor([float(adj_orig.shape[0] ** 2 - adj_orig.sum()) / adj_orig.sum()]).to(device)
@@ -95,7 +92,7 @@ class GAug:
             for layer in self.ep_net.children():
                 if hasattr(layer, 'reset_parameters'):
                     layer.reset_parameters()
-        pretrain_ep_net(self.ep_net, self.optimizer, adj_norm, feature, adj_orig, norm_w, pos_weight, gaug_param.gaug_interval, self.gae, val_edges, edge_labels)
+        pretrain_ep_net(self.ep_net, self.optimizer, adj_norm, feature, adj_orig, norm_w, pos_weight, gaug_param['ep'], self.gae, val_edges, edge_labels)
 
         # predict
         with torch.no_grad():
@@ -103,7 +100,7 @@ class GAug:
             adj_logits = self.ep_net(adj_norm, feature)
             # adj_new = normalize_adj('gcn', sample_adj(adj_logits, TEMP), device)
 
-            adj_pred = self.sample_graph_det(adj, adj_logits, gaug_param.removal_rate, gaug_param.add_rate)
+            adj_pred = self.sample_graph_det(adj, adj_logits, gaug_param['removal_rate'], gaug_param['add_rate'])
             self.updated_edges = csr_to_edgelist(adj_pred).type(torch.int64)
 
     def sample_pos_edges(self, adj_matrix, n_edges_sample):

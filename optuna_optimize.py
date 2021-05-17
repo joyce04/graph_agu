@@ -7,6 +7,7 @@ import torch
 from torch.optim import Adam
 
 from de.util import get_sampler
+from gaug.gaug import GAug
 from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
 from util.data import dataset_split
@@ -20,7 +21,6 @@ def objective(trial):
 
     for r in range(10):
         dataset, data = dataset_split(args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split)
-        num_nodes = data.x.shape[0]
         num_feats = data.x.shape[1]
         num_nd_classes = np.max(data.y.numpy()) + 1
 
@@ -42,8 +42,15 @@ def objective(trial):
                 normalization = trial.suggest_categorical('de_normalization', ['NormLap', 'Lap', 'FirstOrderGCN', 'NormAdj', 'NoNorm', 'INorm'])
                 # ['NormLap', 'Lap', 'RWalkLap', 'FirstOrderGCN', 'AugNormAdj', 'BingGeNormAdj', 'NormAdj', 'RWalk', 'AugRWalk', 'NoNorm', 'INorm']
                 train_loss = train(data, model, optimizer, device, sampler, sampling_percent, normalization)
+            elif args.config.find('gaug.json') >= 0:
+                if args.gaug_type == 'M':
+                    gaug = GAug(True)
+                    gaug.get_pretrained_edges(data, args.m_file_loc)
+                else:
+                    gaug = GAug(False)
+                    gaug.train_predict_edges(args, data.adj, data.x, data.y, device)
             else:
-                train_loss = train(data, model, optimizer)
+                raise Exception('train function not defined')
             val_loss = validate(data, model)
 
             print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
@@ -85,8 +92,10 @@ if __name__ == '__main__':
 
     if args.config.find('de.json') >= 0:
         from train_de import train
+    elif args.config.find('gaug.json') >= 0:
+        from train_gaug import train
 
-    study.optimize(objective, n_trials=200)
+    study.optimize(objective, n_trials=50)
 
     with open('./results/nc_optuna_{}_{}_{}_{}_es_{}.txt'.format(args.config.replace('.json', ''), args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
         file.write(','.join(map(lambda x: x + ':' + str(vars(args)[x]), vars(args).keys())) + '\n')
