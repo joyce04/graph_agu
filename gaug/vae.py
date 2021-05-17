@@ -58,7 +58,7 @@ def eval_edge_pred(adj_pred, val_edges, edge_labels):
 
 def pretrain_ep_net(model, optimizer, adj, features, adj_orig, norm_w, pos_weight, n_epochs, gae, val_edges, edge_labels):
     """ pretrain the edge prediction network """
-    model.train(,
+    model.train()
 
     for epoch in range(n_epochs):
         optimizer.zero_grad()
