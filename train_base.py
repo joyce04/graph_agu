@@ -11,7 +11,7 @@ from util.data import dataset_split
 from util.tool import EarlyStopping
 
 
-def train(data, model, optimizer):
+def train(data, model, optimizer, device, args):
     optimizer.zero_grad()
 
     out = model(data.x, data.train_index)
@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
             for epoch in range(args.epochs):
                 model.initialize()
-                train_loss = train(data, model, optimizer)
+                train_loss = train(data, model, optimizer, device, args)
                 val_loss = validate(data, model)
 
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')

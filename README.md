@@ -10,6 +10,9 @@
 
 <br>
 
+[optuna](https://github.com/optuna/optuna) is used to find best parameters
+
+<br>
 ##### References
 [1] Kong, Kezhi, et al. "Flag: Adversarial data augmentation for graph neural networks." arXiv preprint arXiv:2010.09891 (2020).<br>
 [2] Zhao, Tong, et al. "Data Augmentation for Graph Neural Networks." arXiv preprint arXiv:2006.06830 (2020).

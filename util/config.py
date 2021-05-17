@@ -54,6 +54,17 @@ def get_configs(args):
             args.de_sampling_percent = config['de_params']['de_sampling_percent']
         if args.de_normalization is None:
             args.de_normalization = config['de_params']['de_normalization']
+    elif args.aug_type == 'gaug':
+        if args.gaug_type is None:
+            args.gaug_type = config['gaug_params']['gaug_type']
+        if args.gaug_interval is None:
+            args.gaug_interval = config['gaug_params']['gaug_interval']
+        if args.removal_rate is None:
+            args.removal_rate = config['gaug_params']['removal_rate']
+        if args.add_rate is None:
+            args.add_rate = config['gaug_params']['add_rate']
+        if args.m_file_loc is None:
+            args.m_file_loc = config['gaug_params']['m_file_loc']
 
     return args
 
@@ -78,6 +89,11 @@ def get_arguments():
     parser.add_argument('--cr', type=bool, help='To apply CR to flag augmentation or not')
     parser.add_argument('--de_sampling_percent', type=float, help='sampling percent for drop edge')
     parser.add_argument('--de_normalization', help='type of normalization to drop edge')
+    parser.add_argument('--gaug_type', help='type of G-Aug either M or O')
+    parser.add_argument('--gaug_interval', type=int, help='For G-Aug O, training edge predictor interval. If 10, edge predictor is trained at every 10th epoch')
+    parser.add_argument('--removal_rate', type=float, help='edge removal rate')
+    parser.add_argument('--add_rate', type=float, help='edge add rate')
+    parser.add_argument('--m_file_loc', help='vae trained file location for G-Aug M')
 
     args = parser.parse_args()
     args = get_configs(args)

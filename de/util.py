@@ -2,8 +2,6 @@ import numpy as np
 import scipy.sparse as sp
 import torch
 
-import networkx as nx
-
 from de.normalize import fetch_normalization, row_normalize
 from de.sampler import Sampler
 
@@ -23,11 +21,6 @@ def sparse_mx_to_torch_sparse_tensor(sparse_mx):
     values = torch.from_numpy(sparse_mx.data)
     shape = torch.Size(sparse_mx.shape)
     return torch.sparse.FloatTensor(indices, values, shape)
-
-
-def csr_to_edgelist(matrix):
-    g = nx.from_scipy_sparse_matrix(matrix.tocsr(), create_using=nx.Graph)  # dropedge sampler works as directed graph
-    return torch.tensor([e for e in g.edges()]).T
 
 
 def get_sampler(data, tadj):

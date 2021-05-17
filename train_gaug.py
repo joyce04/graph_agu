@@ -4,29 +4,21 @@ import numpy as np
 import torch
 from torch.optim import Adam
 
-from de.util import get_sampler
-from util.graph import csr_to_edgelist
 from eval import validate, evaluate
+from gaug.gaug import GAug
 from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
 from util.data import dataset_split
 from util.tool import EarlyStopping
 
 
-def train(data, model, optimizer, device, sampler, sampling_percent, normalization):
-    (train_adj, train_fea) = sampler.randomedge_sampler(percent=sampling_percent, normalization=normalization, cuda=(device == 'cuda'))
-    data.x = train_fea
-    sampler.train_features = train_fea
-    edges = csr_to_edgelist(train_adj).type(torch.int64)
-
+def train(data, model, optimizer):
     optimizer.zero_grad()
 
-    out = model(data.x, edges)
+    out = model(data.x, data.train_index)
     loss = model.loss(out[data.train_mask == 1], data.y[data.train_mask == 1])
-
     loss.backward()
     optimizer.step()
-
     return loss
 
 
@@ -39,7 +31,7 @@ if __name__ == '__main__':
     torch.manual_seed(args.seed)
     device = device_setup()
 
-    with open('./results/nc_de_{}_{}_{}_es_{}.csv'.format(args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
+    with open('./results/nc_gaug_{}_{}_{}_es_{}.csv'.format(args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
         file.write(','.join(map(lambda x: x + ':' + str(vars(args)[x]), vars(args).keys())) + '\n')
         file.write('run, epoch, train F1 avg, train acc avg, validation F1 avg,validation acc avg, test F1 avg, test acc avg\n')
 
@@ -57,15 +49,20 @@ if __name__ == '__main__':
             optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
             early_stopping = EarlyStopping(patience=args.patience, verbose=True)
 
-            sampler, data = get_sampler(data, data.adj)
-
             best_test, best_val, best_tr = 0, 0, 0
             best_acc_test, best_acc_val, best_acc_tr = 0, 0, 0
             lowest_val_loss = float("inf")
 
+            if args.gaug_type == 'M':
+                gaug = GAug(True)
+                gaug.get_pretrained_edges(data, args.m_file_loc)
+            else:
+                gaug = GAug(False)
+                gaug.train_predict_edges(args, data.adj, data.x, data.y, device)
+
             for epoch in range(args.epochs):
                 model.initialize()
-                train_loss = train(data, model, optimizer, device, sampler, args.de_sampling_percent, args.de_normalization)
+                train_loss = train(data, model, optimizer)
                 val_loss = validate(data, model)
 
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
