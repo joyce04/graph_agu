@@ -4,7 +4,7 @@ tmux send-keys "conda activate ocean_g" C-m
 
 code=optuna_optimize.py
 dataset=cora
-config=./configs/de.json
+config=./configs/gaug.json
 tmux send-keys "python $code --config $config --train_ratio 0.01 & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.03 & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.05 & wait" C-m

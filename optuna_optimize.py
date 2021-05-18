@@ -47,7 +47,7 @@ def objective(trial):
             else:
                 gaug = GAug(False)
                 gaug_ep = trial.suggest_categorical('train_interval', [10, 20, 30])  # gaug_param['ep']
-                gaug.train_predict_edges(args, data.adj, data.x, data.y, device, gaug_ep, removal_rate, add_rate)
+                gaug.train_predict_edges(data.adj, data.x, data.y, device, gaug_ep, removal_rate, add_rate)
         else:
             raise Exception('train function not defined')
 

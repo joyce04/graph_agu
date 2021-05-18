@@ -101,7 +101,7 @@ if __name__ == '__main__':
                     gaug.get_pretrained_edges(data, args.m_file_loc, args.removal_rate, args.add_rate)
                 else:
                     gaug = GAug(False)
-                    gaug.train_predict_edges(args, data.adj, data.x, data.y, device, args.gaug_interval, args.removal_rate, args.add_rate)
+                    gaug.train_predict_edges(data.adj, data.x, data.y, device, args.gaug_interval, args.removal_rate, args.add_rate)
 
             for epoch in range(args.epochs):
                 model.initialize()
