@@ -101,7 +101,7 @@ if __name__ == '__main__':
                     gaug.get_pretrained_edges(data, args.m_file_loc, args.removal_rate, args.add_rate)
                 else:
                     gaug = GAug(False)
-                    gaug.train_predict_edges(data.adj, data.x, data.y, device, args.gaug_interval, args.removal_rate, args.add_rate)
+                    gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
 
             for epoch in range(args.epochs):
                 model.initialize()
@@ -110,7 +110,7 @@ if __name__ == '__main__':
                 elif args.config.find('base.json') >= 0:
                     train_loss = train(data, model, optimizer, device, args)
                 elif args.config.find('de.json') >= 0:
-                    train_loss = train(data, model, optimizer, device, sampler, args.de_sampling_percent, args.de_normalization)
+                    train_loss = train_de(data, model, optimizer, device, sampler, args.de_sampling_percent, args.de_normalization)
                 elif args.config.find('gaug.json') >= 0:
                     train_loss = train_gaug(data, gaug, model, optimizer, device)
                 val_loss = validate(data, model)

@@ -90,7 +90,7 @@ def get_arguments():
     parser.add_argument('--de_sampling_percent', type=float, help='sampling percent for drop edge')
     parser.add_argument('--de_normalization', help='type of normalization to drop edge')
     parser.add_argument('--gaug_type', help='type of G-Aug either M or O')
-    parser.add_argument('--gaug_interval', type=int, help='For G-Aug O, training edge predictor interval. If 10, edge predictor is trained at every 10th epoch')
+    parser.add_argument('--gaug_interval', type=int, help='For G-Aug O, training edge predictor interval. If 10, edge predictor is trained at every 10th epoch for 30epoch')
     parser.add_argument('--removal_rate', type=float, help='edge removal rate')
     parser.add_argument('--add_rate', type=float, help='edge add rate')
     parser.add_argument('--m_file_loc', help='vae trained file location for G-Aug M')

@@ -134,6 +134,7 @@ def train_test_split_edges(data, train_ratio=0.6, val_ratio=0.2, test_ratio=0.2)
 
     return data
 
+
 def get_unlabeled_nodes(data):
     ul_train_mask = torch.zeros(data.num_nodes)
     selected_nodes = torch.cat((data.train_mask.nonzero().T, data.val_mask.nonzero().T, data.test_mask.nonzero().T), dim=1)[0]
@@ -141,6 +142,7 @@ def get_unlabeled_nodes(data):
     ul_train_mask[list(set(b.numpy()).difference(set(selected_nodes.numpy())))] = 1
     data.ul_train_mask = ul_train_mask
     return data
+
 
 # args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split
 def dataset_split(file_loc='./dataset/', dataset_name='cora', split_type='public', subset_ratio=0.1, edge_split=False):
@@ -157,11 +159,12 @@ def dataset_split(file_loc='./dataset/', dataset_name='cora', split_type='public
             if edge_split:
                 data = train_test_split_edges(data, subset_ratio, val_ratio=0.2, test_ratio=0.2)
 
-        #self-loop
+        # self-loop
         if edge_split:
-            data.train_index = add_self_loops(data.train_pos_edge_index, data.num_nodes)
+            data.train_index = data.train_pos_edge_index
         else:
-            data.train_index = add_self_loops(data.edge_index, data.num_nodes)
+            data.train_index = data.edge_index
+        data.train_index = add_self_loops(data.train_index, data.num_nodes)
         adj, deg = build_graph(data, split_type)
         data.adj = adj
         data.degree = deg

@@ -40,14 +40,13 @@ def objective(trial):
             # ['NormLap', 'Lap', 'RWalkLap', 'FirstOrderGCN', 'AugNormAdj', 'BingGeNormAdj', 'NormAdj', 'RWalk', 'AugRWalk', 'NoNorm', 'INorm']
         elif args.config.find('gaug.json') >= 0:
             removal_rate = trial.suggest_int('removal_rate', 10, 90)  # gaug_param['removal_rate']
-            add_rate = trial.suggest_int('add_rate', 10, 90)  # gaug_param['add_rate']
+            add_rate = trial.suggest_int('add_rate', 50, 150)  # gaug_param['add_rate']
             if args.gaug_type == 'M':
                 gaug = GAug(True)
                 gaug.get_pretrained_edges(data, args.m_file_loc, removal_rate, add_rate)
             else:
                 gaug = GAug(False)
-                gaug_ep = trial.suggest_categorical('train_interval', [10, 20, 30])  # gaug_param['ep']
-                gaug.train_predict_edges(data.adj, data.x, data.y, device, gaug_ep, removal_rate, add_rate)
+                gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, removal_rate, add_rate)
         else:
             raise Exception('train function not defined')
 
@@ -102,7 +101,7 @@ if __name__ == '__main__':
     elif args.config.find('gaug.json') >= 0:
         from train_base import train_gaug as train
 
-    study.optimize(objective, n_trials=5)
+    study.optimize(objective, n_trials=10)
 
     with open('./results/nc_optuna_{}_{}_{}_{}_es_{}.txt'.format(args.config.replace('.json', '').replace('./configs/', ''),
                                                                  args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
