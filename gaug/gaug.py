@@ -54,9 +54,9 @@ class GAug:
         adj_pred = adj_pred + adj_pred.T
         return adj_pred
 
-    def get_pretrained_edges(self, dataset, data, removal_rate, add_rate):
+    def get_pretrained_edges(self, data, dataset, removal_rate, add_rate):
         if self.pretrain:
-            A_pred = pickle.load(open(f'./gaug/edge_probabilities/{dataset}_graph_5_logits.pkl', 'rb'))
+            A_pred = pickle.load(open(dataset, 'rb'))
             adj_pred = self.sample_graph_det(data.adj, A_pred, removal_rate, add_rate)
             self.updated_edges = csr_to_edgelist(adj_pred).type(torch.int64)
 

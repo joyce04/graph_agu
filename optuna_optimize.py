@@ -29,15 +29,14 @@ def objective(trial):
         optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
         early_stopping = EarlyStopping(patience=args.patience, verbose=True)
 
-        sampler, data = get_sampler(data, data.adj)
-
         best_test, best_val, best_tr = 0, 0, 0
         best_acc_test, best_acc_val, best_acc_tr = 0, 0, 0
         lowest_val_loss = float("inf")
 
         if args.config.find('de.json') >= 0:
+            sampler, data = get_sampler(data, data.adj)
             sampling_percent = trial.suggest_float('de_sampling_percent', 0.1, 0.8)
-            normalization = trial.suggest_categorical('de_normalization', ['NormLap', 'Lap', 'FirstOrderGCN', 'NormAdj', 'NoNorm', 'INorm'])
+            normalization = trial.suggest_categorical('de_normalization', ['FirstOrderGCN'])
             # ['NormLap', 'Lap', 'RWalkLap', 'FirstOrderGCN', 'AugNormAdj', 'BingGeNormAdj', 'NormAdj', 'RWalk', 'AugRWalk', 'NoNorm', 'INorm']
         elif args.config.find('gaug.json') >= 0:
             removal_rate = trial.suggest_int('removal_rate', 10, 90)  # gaug_param['removal_rate']
@@ -54,6 +53,7 @@ def objective(trial):
 
         for epoch in range(args.epochs):
             model.initialize()
+
             if args.config.find('de.json') >= 0:
                 train_loss = train(data, model, optimizer, device, sampler, sampling_percent, normalization)
             elif args.config.find('gaug.json') >= 0:
@@ -102,9 +102,10 @@ if __name__ == '__main__':
     elif args.config.find('gaug.json') >= 0:
         from train_base import train_gaug as train
 
-    study.optimize(objective, n_trials=50)
+    study.optimize(objective, n_trials=5)
 
-    with open('./results/nc_optuna_{}_{}_{}_{}_es_{}.txt'.format(args.config.replace('.json', ''), args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
+    with open('./results/nc_optuna_{}_{}_{}_{}_es_{}.txt'.format(args.config.replace('.json', '').replace('./configs/', ''),
+                                                                 args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
         file.write(','.join(map(lambda x: x + ':' + str(vars(args)[x]), vars(args).keys())) + '\n')
         file.write('run, epoch, train F1 avg, train acc avg, validation F1 avg,validation acc avg, test F1 avg, test acc avg\n')
 
