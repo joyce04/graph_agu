@@ -35,22 +35,29 @@ def objective(trial):
         best_acc_test, best_acc_val, best_acc_tr = 0, 0, 0
         lowest_val_loss = float("inf")
 
+        if args.config.find('de.json') >= 0:
+            sampling_percent = trial.suggest_float('de_sampling_percent', 0.1, 0.8)
+            normalization = trial.suggest_categorical('de_normalization', ['NormLap', 'Lap', 'FirstOrderGCN', 'NormAdj', 'NoNorm', 'INorm'])
+            # ['NormLap', 'Lap', 'RWalkLap', 'FirstOrderGCN', 'AugNormAdj', 'BingGeNormAdj', 'NormAdj', 'RWalk', 'AugRWalk', 'NoNorm', 'INorm']
+        elif args.config.find('gaug.json') >= 0:
+            removal_rate = trial.suggest_int('removal_rate', 10, 90)  # gaug_param['removal_rate']
+            add_rate = trial.suggest_int('add_rate', 10, 90)  # gaug_param['add_rate']
+            if args.gaug_type == 'M':
+                gaug = GAug(True)
+                gaug.get_pretrained_edges(data, args.m_file_loc, removal_rate, add_rate)
+            else:
+                gaug = GAug(False)
+                gaug_ep = trial.suggest_categorical('train_interval', [10, 20, 30])  # gaug_param['ep']
+                gaug.train_predict_edges(args, data.adj, data.x, data.y, device, gaug_ep, removal_rate, add_rate)
+        else:
+            raise Exception('train function not defined')
+
         for epoch in range(args.epochs):
             model.initialize()
             if args.config.find('de.json') >= 0:
-                sampling_percent = trial.suggest_float('de_sampling_percent', 0.1, 0.8)
-                normalization = trial.suggest_categorical('de_normalization', ['NormLap', 'Lap', 'FirstOrderGCN', 'NormAdj', 'NoNorm', 'INorm'])
-                # ['NormLap', 'Lap', 'RWalkLap', 'FirstOrderGCN', 'AugNormAdj', 'BingGeNormAdj', 'NormAdj', 'RWalk', 'AugRWalk', 'NoNorm', 'INorm']
                 train_loss = train(data, model, optimizer, device, sampler, sampling_percent, normalization)
             elif args.config.find('gaug.json') >= 0:
-                if args.gaug_type == 'M':
-                    gaug = GAug(True)
-                    gaug.get_pretrained_edges(data, args.m_file_loc)
-                else:
-                    gaug = GAug(False)
-                    gaug.train_predict_edges(args, data.adj, data.x, data.y, device)
-            else:
-                raise Exception('train function not defined')
+                train_loss = train(data, gaug, model, optimizer, device)
             val_loss = validate(data, model)
 
             print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
@@ -91,9 +98,9 @@ if __name__ == '__main__':
     study = optuna.create_study(direction='maximize')
 
     if args.config.find('de.json') >= 0:
-        from train_de import train
+        from train_base import train_de as train
     elif args.config.find('gaug.json') >= 0:
-        from train_gaug import train
+        from train_base import train_gaug as train
 
     study.optimize(objective, n_trials=50)
 

@@ -9,6 +9,10 @@ from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
 from util.data import dataset_split
 from util.tool import EarlyStopping
+from flag.train import apply
+from util.graph import csr_to_edgelist
+from de.util import get_sampler
+from gaug.gaug import GAug
 
 
 def train(data, model, optimizer, device, args):
@@ -21,6 +25,43 @@ def train(data, model, optimizer, device, args):
     return loss
 
 
+def train_flag(data, model, optimizer, device, args):
+    forward = lambda perturb: model(data.x + perturb, data.train_index)
+    model_forward = (model, forward)
+    loss = apply(model_forward, data, optimizer, device, args)
+    return loss
+
+
+def train_de(data, model, optimizer, device, sampler, sampling_percent, normalization):
+    (train_adj, train_fea) = sampler.randomedge_sampler(percent=sampling_percent, normalization=normalization, cuda=(device == 'cuda'))
+    data.x = train_fea
+    sampler.train_features = train_fea
+    edges = csr_to_edgelist(train_adj).type(torch.int64)
+
+    optimizer.zero_grad()
+
+    out = model(data.x, edges)
+    loss = model.loss(out[data.train_mask == 1], data.y[data.train_mask == 1])
+
+    loss.backward()
+    optimizer.step()
+
+    return loss
+
+
+def train_gaug(data, gaug, model, optimizer, device):
+    optimizer.zero_grad()
+
+    updated_edges = gaug.updated_edges
+    out = model(data.x, updated_edges)
+    loss = model.loss(out[data.train_mask == 1], data.y[data.train_mask == 1])
+
+    loss.backward()
+    optimizer.step()
+
+    return loss
+
+
 if __name__ == '__main__':
     args = get_arguments()
     print(args)
@@ -30,7 +71,7 @@ if __name__ == '__main__':
     torch.manual_seed(args.seed)
     device = device_setup()
 
-    with open('./results/nc_base_{}_{}_{}_es_{}.csv'.format(args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
+    with open('./results/nc_{}_{}_{}_{}_es_{}.csv'.format(args.config.replace('.json', ''), args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
         file.write(','.join(map(lambda x: x + ':' + str(vars(args)[x]), vars(args).keys())) + '\n')
         file.write('run, epoch, train F1 avg, train acc avg, validation F1 avg,validation acc avg, test F1 avg, test acc avg\n')
 
@@ -52,9 +93,26 @@ if __name__ == '__main__':
             best_acc_test, best_acc_val, best_acc_tr = 0, 0, 0
             lowest_val_loss = float("inf")
 
+            if args.config.find('de.json') >= 0:
+                sampler, data = get_sampler(data, data.adj)
+            elif args.config.find('gaug.json') >= 0:
+                if args.gaug_type == 'M':
+                    gaug = GAug(True)
+                    gaug.get_pretrained_edges(data, args.m_file_loc, args.removal_rate, args.add_rate)
+                else:
+                    gaug = GAug(False)
+                    gaug.train_predict_edges(args, data.adj, data.x, data.y, device, args.gaug_interval, args.removal_rate, args.add_rate)
+
             for epoch in range(args.epochs):
                 model.initialize()
-                train_loss = train(data, model, optimizer, device, args)
+                if args.config.find('flag.json') >= 0:
+                    train_loss = train_flag(data, model, optimizer, device, args)
+                elif args.config.find('base.json') >= 0:
+                    train_loss = train(data, model, optimizer, device, args)
+                elif args.config.find('de.json') >= 0:
+                    train_loss = train(data, model, optimizer, device, sampler, args.de_sampling_percent, args.de_normalization)
+                elif args.config.find('gaug.json') >= 0:
+                    train_loss = train_gaug(data, gaug, model, optimizer, device)
                 val_loss = validate(data, model)
 
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
