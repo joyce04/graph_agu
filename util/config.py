@@ -20,6 +20,8 @@ def get_configs(args):
             args.train_ratio = config['subset_params']['train_ratio']
         if args.edge_split is None:
             args.edge_split = bool(config['subset_params']['edge_split'])
+        else:
+            args.edge_split = bool(args.edge_split)
     else:
         args.edge_split = False
 
@@ -76,7 +78,7 @@ def get_arguments():
     parser.add_argument('--dataset', help='benchmark dataset : cora, citeseer, pubmed')
     parser.add_argument('--data_split', help='public, full, random')
     parser.add_argument('--train_ratio', type=float, help='train subset ratio, Only applicable for random')
-    parser.add_argument('--edge_split', type=bool, help='Only applicable for random')
+    parser.add_argument('--edge_split', type=int, help='Only applicable for random')
     parser.add_argument('--epochs', type=int, help='Number of epochs to train')
     parser.add_argument('--gnn', help='gcn, graphsage, gat')
     parser.add_argument('--seed', type=int, help='random seed')
