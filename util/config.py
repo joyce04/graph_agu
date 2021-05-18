@@ -19,7 +19,7 @@ def get_configs(args):
         if args.train_ratio is None:
             args.train_ratio = config['subset_params']['train_ratio']
         if args.edge_split is None:
-            args.edge_split = config['subset_params']['edge_split']
+            args.edge_split = bool(config['subset_params']['edge_split'])
     else:
         args.edge_split = False
 
