@@ -34,13 +34,13 @@ def train_flag(data, model, optimizer, device, args):
 
 def train_de(data, model, optimizer, device, sampler, sampling_percent, normalization):
     (train_adj, train_fea) = sampler.randomedge_sampler(percent=sampling_percent, normalization=normalization, cuda=(device == 'cuda'))
-    data.x = train_fea
+    data.x = torch.Tensor(train_fea).to(device)
     sampler.train_features = train_fea
     edges = csr_to_edgelist(train_adj).type(torch.int64)
 
     optimizer.zero_grad()
 
-    out = model(data.x, edges)
+    out = model(data.x, edges.to(device))
     loss = model.loss(out[data.train_mask == 1], data.y[data.train_mask == 1])
 
     loss.backward()
@@ -85,9 +85,6 @@ if __name__ == '__main__':
             num_feats = data.x.shape[1]
             num_nd_classes = np.max(data.y.numpy()) + 1
 
-            data.x = data.x.to(device)
-            data.train_index = data.train_index.to(device)
-            data.y = data.y.to(device)
             model = generate_node_clf(args.gnn, num_feats, num_nd_classes, device)
             optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
             early_stopping = EarlyStopping(patience=args.patience, verbose=True)
@@ -97,7 +94,7 @@ if __name__ == '__main__':
             lowest_val_loss = float("inf")
 
             if args.config.find('de.json') >= 0:
-                sampler, data = get_sampler(data, data.adj)
+                sampler, data = get_sampler(data, data.adj, device)
             elif args.config.find('gaug.json') >= 0:
                 if args.gaug_type == 'M':
                     gaug = GAug(True)
@@ -106,6 +103,9 @@ if __name__ == '__main__':
                     gaug = GAug(False)
                     gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
 
+            data.x = data.x.to(device)
+            data.train_index = data.train_index.to(device)
+            data.y = data.y.to(device)
             for epoch in range(args.epochs):
                 model.initialize()
                 if args.config.find('flag.json') >= 0:

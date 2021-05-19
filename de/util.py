@@ -23,11 +23,14 @@ def sparse_mx_to_torch_sparse_tensor(sparse_mx):
     return torch.sparse.FloatTensor(indices, values, shape)
 
 
-def get_sampler(data, tadj):
-    features = sp.csr_matrix(data.x).tolil()
+def get_sampler(data, tadj, device):
+    if device == 'cpu':
+        features = sp.csr_matrix(data.x).tolil()
+    else:
+        features = sp.csr_matrix(data.x.cpu()).tolil()
     adj, features = preprocess_citation(tadj, features, 'NoNorm')
     features = np.array(features.todense())
-    data.x = features
+    data.x = torch.Tensor(features)
     data.adj = adj
 
     return Sampler(data.adj, data.x), data

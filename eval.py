@@ -31,8 +31,8 @@ def evaluate_metrics(data, out, device):
             outputs['{}_f1'.format(key)] = f1_score(data.y[mask == 1], pred.data.numpy(), average='micro')
             outputs['{}_acc'.format(key)] = accuracy_score(data.y[mask == 1], pred.data.numpy())
         else:
-            outputs['{}_f1'.format(key)] = f1_score(data.y[mask == 1], pred.data.cpu().numpy(), average='micro')
-            outputs['{}_acc'.format(key)] = accuracy_score(data.y[mask == 1], pred.data.cpu().numpy())
+            outputs['{}_f1'.format(key)] = f1_score(data.y[mask == 1].cpu(), pred.data.cpu().numpy(), average='micro')
+            outputs['{}_acc'.format(key)] = accuracy_score(data.y[mask == 1].cpu(), pred.data.cpu().numpy())
     return outputs
 
 
