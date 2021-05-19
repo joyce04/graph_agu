@@ -50,7 +50,9 @@ def get_configs(args):
         if args.step_size is None:
             args.step_size = config['flag_params']['step_size']
         if args.cr is None:
-            args.cr = config['flag_params']['cr']
+            args.cr = bool(config['flag_params']['cr'])
+        else:
+            args.cr = bool(args.cr)
     elif args.aug_type == 'drop_edge':
         if args.de_sampling_percent is None:
             args.de_sampling_percent = config['de_params']['de_sampling_percent']
@@ -88,7 +90,7 @@ def get_arguments():
     parser.add_argument('--aug_type', help='augmentation type')
     parser.add_argument('--m', type=int, help='Number of flag iteration')
     parser.add_argument('--step_size', type=float, help='flag step size')
-    parser.add_argument('--cr', type=bool, help='To apply CR to flag augmentation or not')
+    parser.add_argument('--cr', type=int, help='To apply CR to flag augmentation or not')
     parser.add_argument('--de_sampling_percent', type=float, help='sampling percent for drop edge')
     parser.add_argument('--de_normalization', help='type of normalization to drop edge')
     parser.add_argument('--gaug_type', help='type of G-Aug either M or O')

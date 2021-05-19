@@ -47,6 +47,8 @@ def objective(trial):
             else:
                 gaug = GAug(False)
                 gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, removal_rate, add_rate)
+        elif args.config.find('flag.json') >= 0:
+            args.m = trial.suggest_int('flag_m', 2, 5)
         else:
             raise Exception('train function not defined')
 
@@ -57,6 +59,8 @@ def objective(trial):
                 train_loss = train(data, model, optimizer, device, sampler, sampling_percent, normalization)
             elif args.config.find('gaug.json') >= 0:
                 train_loss = train(data, gaug, model, optimizer, device)
+            elif args.config.find('flag.json') >= 0:
+                train_loss = train(data, model, optimizer, device, args)
             val_loss = validate(data, model)
 
             print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
@@ -100,6 +104,8 @@ if __name__ == '__main__':
         from train_base import train_de as train
     elif args.config.find('gaug.json') >= 0:
         from train_base import train_gaug as train
+    elif args.config.find('flag.json') >= 0:
+        from train_base import train_flag as train
 
     study.optimize(objective, n_trials=10)
 
