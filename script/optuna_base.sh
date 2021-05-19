@@ -20,7 +20,7 @@ tmux send-keys "python $code --config $config --train_ratio 0.5 & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.55 & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.6 & wait" C-m
 
-edge_split=false
+edge_split=0
 tmux send-keys "python $code --config $config --train_ratio 0.01 --edge_split $edge_split & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.03 --edge_split $edge_split & wait" C-m
 tmux send-keys "python $code --config $config --train_ratio 0.05 --edge_split $edge_split & wait" C-m
