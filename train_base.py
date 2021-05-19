@@ -9,7 +9,7 @@ from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
 from util.data import dataset_split
 from util.tool import EarlyStopping
-from flag.train import apply
+from flag.original import apply
 from util.graph import csr_to_edgelist
 from de.util import get_sampler
 from gaug.gaug import GAug
@@ -71,9 +71,10 @@ if __name__ == '__main__':
     torch.manual_seed(args.seed)
     device = device_setup()
 
-    with open('./results/nc_{}_{}_{}_{}_es_{}.csv'.format(args.config.replace('.json', '').replace('./configs/', ''), args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
+    with open('./results/nc_{}_{}_{}_{}_es_{}.csv'.format(args.config.replace('.json', '').replace('./configs/', ''), args.gnn, args.epochs, args.dataset, str(args.edge_split)),
+              'a+') as file:
         file.write(','.join(map(lambda x: x + ':' + str(vars(args)[x]), vars(args).keys())) + '\n')
-        file.write('run, epoch, train F1 avg, train acc avg, validation F1 avg,validation acc avg, test F1 avg, test acc avg\n')
+        file.write('run, train F1 avg, train acc avg, validation F1 avg,validation acc avg, test F1 avg, test acc avg\n')
 
         val_f1_list, test_f1_list, train_f1_list = [], [], []
         val_acc_list, test_acc_list, train_acc_list = [], [], []
@@ -85,6 +86,8 @@ if __name__ == '__main__':
             num_nd_classes = np.max(data.y.numpy()) + 1
 
             data.x = data.x.to(device)
+            data.train_index = data.train_index.to(device)
+            data.y = data.y.to(device)
             model = generate_node_clf(args.gnn, num_feats, num_nd_classes, device)
             optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
             early_stopping = EarlyStopping(patience=args.patience, verbose=True)
@@ -118,7 +121,7 @@ if __name__ == '__main__':
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
                 if lowest_val_loss > val_loss or epoch == args.epochs - 1:
                     lowest_val_loss = val_loss
-                    evals = evaluate(model, data)
+                    evals = evaluate(model, data, device)
                     best_val = evals['val_f1']
                     best_test = evals['test_f1']
                     best_tr = evals['train_f1']

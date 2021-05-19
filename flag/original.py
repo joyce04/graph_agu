@@ -6,20 +6,18 @@ from cr.util import compute_consistency
 def apply(model_forward, data, optimizer, device, args):
     m = args.m
     step_size = args.step_size
-    cr_include = args.cr
 
     train_idx = data.train_mask.nonzero().T[0]
-    perturb_shape = data.x.shape
     model, forward = model_forward
 
     optimizer.zero_grad()
 
-    perturb = torch.FloatTensor(*perturb_shape).uniform_(-step_size, step_size).to(device)
+    perturb = torch.FloatTensor(*data.x.shape).uniform_(-step_size, step_size).to(device)
     perturb.requires_grad_()
 
     out = forward(perturb)
 
-    condition = torch.bitwise_or(data.ul_train_mask, data.train_mask)
+    condition = torch.bitwise_or(data.ul_train_mask.to(torch.bool), data.train_mask.to(torch.bool))
     pred_label = out.detach()[condition]
     loss = model.loss(out[train_idx], data.y[train_idx]) / m
 
@@ -32,7 +30,7 @@ def apply(model_forward, data, optimizer, device, args):
         out = forward(perturb)
         loss = model.loss(out[train_idx], data.y[train_idx]) / m
 
-    if cr_include:
+    if args.cr:
         cr_loss = compute_consistency(pred_label, out[condition])
         loss = loss + cr_loss
 

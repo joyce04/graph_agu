@@ -35,4 +35,4 @@ def generate_node_clf(gnn_type, num_feats, num_nd_classes, device):
         gnn = SAGE(2, num_feats, 128, num_nd_classes, 0.5).to(device)
     elif gnn_type == 'gat':
         gnn = GAT(8, num_feats, 8, num_nd_classes, 0.5).to(device)
-    return NodeClassifier(gnn, nn.CrossEntropyLoss())
+    return NodeClassifier(gnn, nn.CrossEntropyLoss().to(device))

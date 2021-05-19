@@ -66,7 +66,7 @@ def objective(trial):
             print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
             if lowest_val_loss > val_loss or epoch == args.epochs - 1:
                 lowest_val_loss = val_loss
-                evals = evaluate(model, data)
+                evals = evaluate(model, data, device)
                 best_val = evals['val_f1']
                 best_test = evals['test_f1']
                 best_tr = evals['train_f1']

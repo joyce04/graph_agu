@@ -19,7 +19,7 @@ def validate(data, model):
 #     return model.loss(out[data.val_mask == 1], data.y[data.val_mask == 1])
 
 
-def evaluate_metrics(data, out):
+def evaluate_metrics(data, out, device):
     outputs = {}
     for key in ['train', 'val', 'test']:
         mask = data['{}_mask'.format(key)]
@@ -27,17 +27,21 @@ def evaluate_metrics(data, out):
         pred = out[mask == 1].max(dim=1)[1]
 
         outputs['{}_loss'.format(key)] = loss
-        outputs['{}_f1'.format(key)] = f1_score(data.y[mask == 1], pred.data.numpy(), average='micro')
-        outputs['{}_acc'.format(key)] = accuracy_score(data.y[mask == 1], pred.data.numpy())
+        if device == 'cpu':
+            outputs['{}_f1'.format(key)] = f1_score(data.y[mask == 1], pred.data.numpy(), average='micro')
+            outputs['{}_acc'.format(key)] = accuracy_score(data.y[mask == 1], pred.data.numpy())
+        else:
+            outputs['{}_f1'.format(key)] = f1_score(data.y[mask == 1], pred.data.cpu().numpy(), average='micro')
+            outputs['{}_acc'.format(key)] = accuracy_score(data.y[mask == 1], pred.data.cpu().numpy())
     return outputs
 
 
 @torch.no_grad()
-def evaluate(model, data):
+def evaluate(model, data, device):
     model.evaluate()
     out = model(data.x, data.train_index)
 
-    return evaluate_metrics(data, out)
+    return evaluate_metrics(data, out, device)
 
 
 # @torch.no_grad()
