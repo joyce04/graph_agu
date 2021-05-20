@@ -29,13 +29,12 @@ def objective(trial):
         early_stopping = EarlyStopping(patience=args.patience, verbose=True)
 
         best_test, best_val, best_tr = 0, 0, 0
-        best_acc_test, best_acc_val, best_acc_tr = 0, 0, 0
         lowest_val_loss = float("inf")
 
         if args.config.find('de.json') >= 0:
             sampler, data = get_sampler(data, data.adj, device)
             sampling_percent = trial.suggest_float('de_sampling_percent', 0.1, 0.8)  # under different edge dropping rates : 0 - 0.8
-            normalization = trial.suggest_categorical('de_normalization', ['FirstOrderGCN'])
+            # normalization = trial.suggest_categorical('de_normalization', ['FirstOrderGCN'])
             # ['NormLap', 'Lap', 'RWalkLap', 'FirstOrderGCN', 'AugNormAdj', 'BingGeNormAdj', 'NormAdj', 'RWalk', 'AugRWalk', 'NoNorm', 'INorm']
         elif args.config.find('gaug.json') >= 0:
             removal_rate = trial.suggest_int('removal_rate', 10, 90)  # gaug_param['removal_rate']
@@ -59,7 +58,7 @@ def objective(trial):
             model.initialize()
 
             if args.config.find('de.json') >= 0:
-                train_loss = train(data, model, optimizer, device, sampler, sampling_percent, normalization)
+                train_loss = train(data, model, optimizer, device, sampler, sampling_percent, 'FirstOrderGCN')
             elif args.config.find('gaug.json') >= 0:
                 train_loss = train(data, gaug, model, optimizer, device)
             elif args.config.find('flag.json') >= 0:
@@ -73,9 +72,6 @@ def objective(trial):
                 best_val = evals['val_f1']
                 best_test = evals['test_f1']
                 best_tr = evals['train_f1']
-                best_acc_val = evals['val_acc']
-                best_acc_test = evals['test_acc']
-                best_acc_tr = evals['train_acc']
             early_stopping(val_loss, model)
 
             if early_stopping.early_stop or epoch == args.epochs - 1:
@@ -83,9 +79,6 @@ def objective(trial):
                 val_f1_list.append(best_val)
                 train_f1_list.append(best_tr)
                 test_f1_list.append(best_test)
-                val_acc_list.append(best_acc_val)
-                train_acc_list.append(best_acc_tr)
-                test_acc_list.append(best_acc_test)
                 break
 
     return np.mean(val_acc_list)

@@ -30,7 +30,7 @@ def apply(model_forward, data, optimizer, device, args):
         out = forward(perturb)
         loss = model.loss(out[train_idx], data.y[train_idx]) / m
 
-    if args.cr:
+    if args.cr and args.data_split != 'full':
         cr_loss = compute_consistency(pred_label, out[condition])
         loss = loss + cr_loss
 
