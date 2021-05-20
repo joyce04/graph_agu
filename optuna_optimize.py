@@ -17,7 +17,6 @@ from util.tool import EarlyStopping
 
 def objective(trial):
     val_f1_list, test_f1_list, train_f1_list = [], [], []
-    val_acc_list, test_acc_list, train_acc_list = [], [], []
 
     for r in range(10):
         dataset, data = dataset_split(args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split)
@@ -81,7 +80,7 @@ def objective(trial):
                 test_f1_list.append(best_test)
                 break
 
-    return np.mean(val_acc_list)
+    return np.mean(val_f1_list)
 
 
 if __name__ == '__main__':
