@@ -34,7 +34,7 @@ def objective(trial):
 
         if args.config.find('de.json') >= 0:
             sampler, data = get_sampler(data, data.adj, device)
-            sampling_percent = trial.suggest_float('de_sampling_percent', 0.1, 0.8)
+            sampling_percent = trial.suggest_float('de_sampling_percent', 0.1, 0.8)  # under different edge dropping rates : 0 - 0.8
             normalization = trial.suggest_categorical('de_normalization', ['FirstOrderGCN'])
             # ['NormLap', 'Lap', 'RWalkLap', 'FirstOrderGCN', 'AugNormAdj', 'BingGeNormAdj', 'NormAdj', 'RWalk', 'AugRWalk', 'NoNorm', 'INorm']
         elif args.config.find('gaug.json') >= 0:
