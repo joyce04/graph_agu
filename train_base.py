@@ -74,10 +74,9 @@ if __name__ == '__main__':
     with open('./results/nc_{}_{}_{}_{}_es_{}.csv'.format(args.config.replace('.json', '').replace('./configs/', ''), args.gnn, args.epochs, args.dataset, str(args.edge_split)),
               'a+') as file:
         file.write(','.join(map(lambda x: x + ':' + str(vars(args)[x]), vars(args).keys())) + '\n')
-        file.write('run, train F1 avg, train acc avg, validation F1 avg,validation acc avg, test F1 avg, test acc avg\n')
+        file.write('run, train F1 avg, validation F1 avg, test F1 avg\n')
 
         val_f1_list, test_f1_list, train_f1_list = [], [], []
-        val_acc_list, test_acc_list, train_acc_list = [], [], []
 
         for r in range(10):
             dataset, data = dataset_split(args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split)
@@ -125,9 +124,6 @@ if __name__ == '__main__':
                     best_val = evals['val_f1']
                     best_test = evals['test_f1']
                     best_tr = evals['train_f1']
-                    best_acc_val = evals['val_acc']
-                    best_acc_test = evals['test_acc']
-                    best_acc_tr = evals['train_acc']
                 early_stopping(val_loss, model)
 
                 if early_stopping.early_stop or epoch == args.epochs - 1:
@@ -135,14 +131,9 @@ if __name__ == '__main__':
                     val_f1_list.append(best_val)
                     train_f1_list.append(best_tr)
                     test_f1_list.append(best_test)
-                    val_acc_list.append(best_acc_val)
-                    train_acc_list.append(best_acc_tr)
-                    test_acc_list.append(best_acc_test)
                     break
 
             # file.write(f'{r + 1},{epoch},{best_tr:.4f},{best_val:.4f},{best_test:.4f}\n')
 
-        file.write(
-            f'total,{np.mean(train_f1_list):.4f}, {np.mean(train_acc_list):.4f},{np.mean(val_f1_list):.4f}, {np.mean(val_acc_list):.4f},{np.mean(test_f1_list):.4f}, {np.mean(test_acc_list):.4f}\n')
-        print(
-            f'total,{np.mean(train_f1_list):.4f}, {np.mean(train_acc_list):.4f},{np.mean(val_f1_list):.4f}, {np.mean(val_acc_list):.4f},{np.mean(test_f1_list):.4f}, {np.mean(test_acc_list):.4f}\n')
+        file.write(f'total,{np.mean(train_f1_list):.4f}, {np.mean(val_f1_list):.4f}, {np.mean(test_f1_list):.4f}\n')
+        print(f'total,{np.mean(train_f1_list):.4f}, {np.mean(val_f1_list):.4f}, {np.mean(test_f1_list):.4f}\n')
