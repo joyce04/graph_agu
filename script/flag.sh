@@ -41,9 +41,9 @@ tmux send-keys "python $code --config $config --gnn $gnn_type --train_ratio 0.3 
 tmux send-keys "python $code --config $config --gnn $gnn_type --train_ratio 0.4 --edge_split $edge_split --cr $cr --m 4 & wait" C-m
 tmux send-keys "python $code --config $config --gnn $gnn_type --train_ratio 0.5 --edge_split $edge_split --cr $cr --m 2 & wait" C-m
 tmux send-keys "python $code --config $config --gnn $gnn_type --train_ratio 0.6 --edge_split $edge_split --cr $cr --m 2 & wait" C-m
-#tmux send-keys "python $code --config $config --gnn $gnn_type --data_split public --edge_split $edge_split --cr $cr --m 3 & wait" C-m
-#tmux send-keys "python $code --config $config --gnn $gnn_type --data_split full --edge_split $edge_split --cr $cr --m 3 & wait" C-m
-#
+tmux send-keys "python $code --config $config --gnn $gnn_type --data_split public --edge_split $edge_split --cr $cr --m 3 & wait" C-m
+tmux send-keys "python $code --config $config --gnn $gnn_type --data_split full --edge_split $edge_split --cr $cr --m 3 & wait" C-m
+
 cr=1
 tmux send-keys "python $code --config $config --gnn $gnn_type --train_ratio 0.01 --edge_split $edge_split --cr $cr --m 4 & wait" C-m
 tmux send-keys "python $code --config $config --gnn $gnn_type --train_ratio 0.03 --edge_split $edge_split --cr $cr --m 2 & wait" C-m
