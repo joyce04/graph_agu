@@ -5,7 +5,7 @@ tmux send-keys "conda activate ocean_g" C-m
 
 code=train.py
 dataset=cora
-config=./configs/flag_orig.json
+config=./configs/flag_orig_gaug.json
 gnn_type="gcn"
 cr=0
 edge_split=1
