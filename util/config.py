@@ -44,7 +44,7 @@ def get_configs(args):
     if args.aug_type is None:
         args.aug_type = config['aug_type']
 
-    if args.aug_type in ['flag', 'flag_orig']:
+    if args.aug_type in ['flag', 'flag_orig', 'flag_orig_gaug']:
         if args.m is None:
             args.m = config['flag_params']['m']
         if args.step_size is None:
@@ -58,7 +58,7 @@ def get_configs(args):
             args.de_sampling_percent = config['de_params']['de_sampling_percent']
         if args.de_normalization is None:
             args.de_normalization = config['de_params']['de_normalization']
-    elif args.aug_type == 'gaug':
+    elif args.aug_type in ['gaug', 'flag_orig_gaug']:
         if args.gaug_type is None:
             args.gaug_type = config['gaug_params']['gaug_type']
         if args.gaug_interval is None:
