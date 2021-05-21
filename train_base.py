@@ -85,11 +85,11 @@ if __name__ == '__main__':
             num_nd_classes = np.max(data.y.numpy()) + 1
 
             model = generate_node_clf(args.gnn, num_feats, num_nd_classes, device)
+            model.reset_parameters()
             optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
             early_stopping = EarlyStopping(patience=args.patience, verbose=True)
 
             best_test, best_val, best_tr = 0, 0, 0
-            best_acc_test, best_acc_val, best_acc_tr = 0, 0, 0
             lowest_val_loss = float("inf")
 
             if args.config.find('de.json') >= 0:

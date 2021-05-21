@@ -44,7 +44,7 @@ def get_configs(args):
     if args.aug_type is None:
         args.aug_type = config['aug_type']
 
-    if args.aug_type == 'flag':
+    if args.aug_type in ['flag', 'flag_orig']:
         if args.m is None:
             args.m = config['flag_params']['m']
         if args.step_size is None:
