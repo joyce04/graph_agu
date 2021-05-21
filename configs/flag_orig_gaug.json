@@ -22,6 +22,6 @@
     "gaug_type": "O",
     "gaug_interval": 10,
     "removal_rate": 10,
-    "add_rate": 60,
+    "add_rate": 60
   }
 }

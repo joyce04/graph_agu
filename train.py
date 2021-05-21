@@ -5,7 +5,7 @@ import torch
 from torch.optim import Adam
 
 from eval import validate, evaluate
-from flag.flag_orig import apply_flag_orig
+from flag.flag_orig import apply_flag_orig, apply_orig_flag_gaug
 from gaug.gaug import GAug
 from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup

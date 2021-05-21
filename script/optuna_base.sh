@@ -2,7 +2,7 @@ tmux new -s base_aug -d
 tmux send-keys "source ~/.bashrc" C-m
 tmux send-keys "conda activate ocean_g" C-m
 
-code=optuna_optimize.py
+code=optuna_optimize_all.py
 dataset=cora
 #config=./configs/flag.json
 #gnn_type="gcn"
@@ -58,7 +58,7 @@ dataset=cora
 #tmux send-keys "python $code --config $config --gnn $gnn_type --data_split public --edge_split $edge_split --cr $cr & wait" C-m
 #tmux send-keys "python $code --config $config --gnn $gnn_type --data_split full --edge_split $edge_split --cr $cr & wait" C-m
 
-config=./configs/gaug.json
+config=./configs/flag_orig_gaug.json
 edge_split=1
 gnn_type="gcn"
 gaug_type="O"
