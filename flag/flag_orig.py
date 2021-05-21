@@ -10,7 +10,7 @@ def apply_flag_orig(model_forward, data, optimizer, device, args):
 
     train_idx = data.train_mask.nonzero().T[0]
     model, forward = model_forward
-
+    model.train()
     optimizer.zero_grad()
 
     node_cls = model(data.x, data.train_index)
@@ -44,7 +44,7 @@ def apply_flag_orig(model_forward, data, optimizer, device, args):
         node_cls = forward(perturb)
         loss = model.loss(node_cls[train_idx], data.y[train_idx]) / (m + 1)
 
-    if args.cr:
+    if args.cr and args.data_split != 'full':
         # if not aug_params['threshold_CR'] and no_pred_over_threshold:
         #     cr_loss = 0
         # else:
