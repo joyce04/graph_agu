@@ -42,6 +42,9 @@ if __name__ == '__main__':
             num_nd_classes = np.max(data.y.numpy()) + 1
 
             data.x = data.x.to(device)
+            data.train_index = data.train_index.to(device)
+            data.y = data.y.to(device)
+
             model = generate_node_clf(args.gnn, num_feats, num_nd_classes, device)
             model.reset_parameters()
             optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
