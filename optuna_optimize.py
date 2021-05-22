@@ -37,7 +37,7 @@ def objective(trial):
             # ['NormLap', 'Lap', 'RWalkLap', 'FirstOrderGCN', 'AugNormAdj', 'BingGeNormAdj', 'NormAdj', 'RWalk', 'AugRWalk', 'NoNorm', 'INorm']
         elif args.config.find('gaug.json') >= 0:
             removal_rate = trial.suggest_int('removal_rate', 10, 90)  # gaug_param['removal_rate']
-            add_rate = trial.suggest_int('add_rate', 50, 150)  # gaug_param['add_rate']
+            add_rate = trial.suggest_int('add_rate', 50, 100)  # gaug_param['add_rate']
             if args.gaug_type == 'M':
                 gaug = GAug(True)
                 gaug.get_pretrained_edges(data, args.m_file_loc, removal_rate, add_rate)
@@ -82,7 +82,8 @@ def objective(trial):
 
     with open('./results/nc_optuna_{}_{}_{}_{}_es_{}.txt'.format(args.config.replace('.json', '').replace('./configs/', ''),
                                                                  args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
-        file.write(f'Train F1: {np.mean(train_f1_list):.4f}, Validation F1: {np.mean(val_f1_list):.4f}, Test F1: {np.mean(test_f1_list):.4f}')
+        file.write(f'removal_rate: {str(removal_rate)}, add_rate: {str(add_rate)}\n')
+        file.write(f'Train F1: {np.mean(train_f1_list):.4f}, Validation F1: {np.mean(val_f1_list):.4f}, Test F1: {np.mean(test_f1_list):.4f}\n')
     print(f'Train F1: {np.mean(train_f1_list):.4f}, Validation F1: {np.mean(val_f1_list):.4f}, Test F1: {np.mean(test_f1_list):.4f}')
     return np.mean(val_f1_list)
 
