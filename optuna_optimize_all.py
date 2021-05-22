@@ -61,6 +61,10 @@ def objective(trial):
                 test_f1_list.append(best_test)
                 break
 
+    with open('./results/nc_optuna_all_{}_{}_{}_{}_es_{}.txt'.format(args.config.replace('.json', '').replace('./configs/', ''),
+                                                                     args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
+        file.write(f'Train F1: {np.mean(train_f1_list):.4f}, Validation F1: {np.mean(val_f1_list):.4f}, Test F1: {np.mean(test_f1_list):.4f}')
+    print(f'Train F1: {np.mean(train_f1_list):.4f}, Validation F1: {np.mean(val_f1_list):.4f}, Test F1: {np.mean(test_f1_list):.4f}')
     return np.mean(val_f1_list)
 
 
@@ -78,7 +82,7 @@ if __name__ == '__main__':
     study.optimize(objective, n_trials=100)
 
     with open('./results/nc_optuna_all_{}_{}_{}_{}_es_{}.txt'.format(args.config.replace('.json', '').replace('./configs/', ''),
-                                                                 args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
+                                                                     args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
         file.write(','.join(map(lambda x: x + ':' + str(vars(args)[x]), vars(args).keys())) + '\n')
         file.write('Number of finished trials: ' + str(len(study.trials)) + '\n')
         trial = study.best_trial

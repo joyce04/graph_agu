@@ -80,6 +80,10 @@ def objective(trial):
                 test_f1_list.append(best_test)
                 break
 
+    with open('./results/nc_optuna_{}_{}_{}_{}_es_{}.txt'.format(args.config.replace('.json', '').replace('./configs/', ''),
+                                                                 args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
+        file.write(f'Train F1: {np.mean(train_f1_list):.4f}, Validation F1: {np.mean(val_f1_list):.4f}, Test F1: {np.mean(test_f1_list):.4f}')
+    print(f'Train F1: {np.mean(train_f1_list):.4f}, Validation F1: {np.mean(val_f1_list):.4f}, Test F1: {np.mean(test_f1_list):.4f}')
     return np.mean(val_f1_list)
 
 
