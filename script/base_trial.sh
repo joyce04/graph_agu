@@ -1,14 +1,14 @@
 code=train_base.py
-dataset=cora
+dataset=citeseer
 config=./configs/base.json
 gnn_type="gcn"
-python $code --config $config --gnn $gnn_type --data_split public
-python $code --config $config --gnn $gnn_type --data_split full
+python $code --dataset $dataset --config $config --gnn $gnn_type --data_split public
+python $code --dataset $dataset --config $config --gnn $gnn_type --data_split full
 
 gnn_type="graphsage"
-python $code --config $config --gnn $gnn_type --data_split public
-python $code --config $config --gnn $gnn_type --data_split full
+python $code --dataset $dataset --config $config --gnn $gnn_type --data_split public
+python $code --dataset $dataset --config $config --gnn $gnn_type --data_split full
 
 gnn_type="gat"
-python $code --config $config --gnn $gnn_type --data_split public
-python $code --config $config --gnn $gnn_type --data_split full
+python $code --dataset $dataset --config $config --gnn $gnn_type --data_split public
+python $code --dataset $dataset --config $config --gnn $gnn_type --data_split full

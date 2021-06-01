@@ -8,7 +8,7 @@
     "train_ratio": 0.01
   },
   "aug_type": "none",
-  "gnn": "graphsage",
+  "gnn": "gcn",
   "epochs": 150,
   "learning_rate": 0.003,
   "weight_decay": 0.0005,

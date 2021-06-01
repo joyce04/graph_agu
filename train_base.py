@@ -9,7 +9,7 @@ from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
 from util.data import dataset_split
 from util.tool import EarlyStopping
-from flag.original import apply
+from flag.original import apply, apply_biased
 from util.graph import csr_to_edgelist
 from de.util import get_sampler
 from gaug.gaug import GAug
@@ -28,7 +28,10 @@ def train(data, model, optimizer, device, args):
 def train_flag(data, model, optimizer, device, args):
     forward = lambda perturb: model(data.x + perturb, data.train_index)
     model_forward = (model, forward)
-    loss = apply(model_forward, data, optimizer, device, args)
+    if args.biased:
+        loss = apply_biased(model_forward, data, optimizer, device, args)
+    else:
+        loss = apply(model_forward, data, optimizer, device, args)
     return loss
 
 
@@ -78,7 +81,7 @@ if __name__ == '__main__':
 
         val_f1_list, test_f1_list, train_f1_list = [], [], []
 
-        for r in range(10):
+        for r in range(5):
             dataset, data = dataset_split(args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split)
             num_nodes = data.x.shape[0]
             num_feats = data.x.shape[1]

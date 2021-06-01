@@ -2,12 +2,12 @@
   "data_loc": "./dataset/",
   "dataset": "cora",
   "seed": 1,
-  "data_split": "random",
+  "data_split": "full",
   "subset_params": {
-    "edge_split": true,
+    "edge_split": false,
     "train_ratio": 0.01
   },
-  "gnn": "graphsage",
+  "gnn": "gcn",
   "epochs": 150,
   "learning_rate": 0.003,
   "weight_decay": 0.0005,
@@ -16,7 +16,7 @@
   "flag_params": {
     "m": 3,
     "step_size": 1e-3,
-    "cr": false
+    "cr": true
   },
   "gaug_params": {
     "gaug_type": "O",

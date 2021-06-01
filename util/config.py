@@ -8,6 +8,8 @@ def get_configs(args):
     if args.config:
         with open(args.config) as f:
             config = json.load(f)
+    else:
+        raise Exception('config file not defined')
 
     if args.data_loc is None:
         args.data_loc = config['data_loc']
@@ -53,6 +55,10 @@ def get_configs(args):
             args.cr = bool(config['flag_params']['cr'])
         else:
             args.cr = bool(args.cr)
+        if args.biased is None:
+            args.biased = bool(config['flag_params']['biased'])
+        else:
+            args.biased = bool(args.biased)
     elif args.aug_type == 'drop_edge':
         if args.de_sampling_percent is None:
             args.de_sampling_percent = config['de_params']['de_sampling_percent']
@@ -90,6 +96,7 @@ def get_arguments():
     parser.add_argument('--aug_type', help='augmentation type')
     parser.add_argument('--m', type=int, help='Number of flag iteration')
     parser.add_argument('--step_size', type=float, help='flag step size')
+    parser.add_argument('--biased', type=int, help='flag biased')
     parser.add_argument('--cr', type=int, help='To apply CR to flag augmentation or not')
     parser.add_argument('--de_sampling_percent', type=float, help='sampling percent for drop edge')
     parser.add_argument('--de_normalization', help='type of normalization to drop edge')
