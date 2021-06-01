@@ -28,7 +28,7 @@ def get_sampler(data, tadj, device):
         features = sp.csr_matrix(data.x).tolil()
     else:
         features = sp.csr_matrix(data.x.cpu()).tolil()
-    adj, features = preprocess_citation(tadj, features, 'NoNorm')
+    adj, features = preprocess_citation(tadj, features)
     features = np.array(features.todense())
     data.x = torch.Tensor(features)
     data.adj = adj

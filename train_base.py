@@ -87,16 +87,9 @@ if __name__ == '__main__':
             num_feats = data.x.shape[1]
             num_nd_classes = np.max(data.y.numpy()) + 1
 
-            model = generate_node_clf(args.gnn, num_feats, num_nd_classes, device)
-            model.reset_parameters()
-            optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
-            early_stopping = EarlyStopping(patience=args.patience, verbose=True)
-
-            best_test, best_val, best_tr = 0, 0, 0
-            lowest_val_loss = float("inf")
-
             if args.config.find('de.json') >= 0:
                 sampler, data = get_sampler(data, data.adj, device)
+                dropout = 0.8
             elif args.config.find('gaug.json') >= 0:
                 if args.gaug_type == 'M':
                     gaug = GAug(True)
@@ -104,6 +97,18 @@ if __name__ == '__main__':
                 else:
                     gaug = GAug(False)
                     gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
+                dropout = 0.5
+            else:
+                dropout = 0.5
+
+            model = generate_node_clf(args.gnn, num_feats, num_nd_classes, dropout, device)
+            model.reset_parameters()
+            optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
+            early_stopping = EarlyStopping(patience=400, verbose=True)
+            # early_stopping = EarlyStopping(patience=args.patience, verbose=True)
+
+            best_test, best_val, best_tr = 0, 0, 0
+            lowest_val_loss = float("inf")
 
             data.x = data.x.to(device)
             data.train_index = data.train_index.to(device)
