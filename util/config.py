@@ -29,6 +29,8 @@ def get_configs(args):
 
     if args.epochs is None:
         args.epochs = config['epochs']
+    if args.preepochs is None:
+        args.preepochs = config['preepochs']
 
     if args.gnn is None:
         args.gnn = config['gnn']
@@ -88,6 +90,7 @@ def get_arguments():
     parser.add_argument('--train_ratio', type=float, help='train subset ratio, Only applicable for random')
     parser.add_argument('--edge_split', type=int, help='Only applicable for random')
     parser.add_argument('--epochs', type=int, help='Number of epochs to train')
+    parser.add_argument('--preepochs', type=int, help='Number of epochs to pre-train, only applicable to SSL')
     parser.add_argument('--gnn', help='gcn, graphsage, gat')
     parser.add_argument('--seed', type=int, help='random seed')
     parser.add_argument('--learning_rate', type=float, help='learning rate')

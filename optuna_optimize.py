@@ -15,15 +15,21 @@ from eval import validate, evaluate
 from util.tool import EarlyStopping
 
 
-def objective(trial):
+def objective(trial, dropout):
     val_f1_list, test_f1_list, train_f1_list = [], [], []
+    if args.config.find('de.json') >= 0:
+        dropout = 0.8
+    elif args.config.find('gaug.json') >= 0:
+        dropout = 0.5
+    elif args.config.find('flag.json') >= 0:
+        dropout = 0.5
 
     for r in range(10):
         dataset, data = dataset_split(args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split)
         num_feats = data.x.shape[1]
         num_nd_classes = np.max(data.y.numpy()) + 1
 
-        model = generate_node_clf(args.gnn, num_feats, num_nd_classes, device)
+        model = generate_node_clf(args.gnn, num_feats, num_nd_classes, dropout, device)
         optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
         early_stopping = EarlyStopping(patience=args.patience, verbose=True)
 
