@@ -9,7 +9,7 @@ from flag.pretrain import apply_flag_orig_cr_only, apply_orig_flag_gaug_cr_only
 from gaug.gaug import GAug
 from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
-from util.data import dataset_split
+from util.data import dataset_split, get_graph, get_adj
 from util.tool import EarlyStopping
 
 
@@ -92,6 +92,9 @@ if __name__ == '__main__':
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.8f}, Val Loss: {val_loss:.4f}')
                 # if early_stopping_pre.early_stop:
                 #     break
+                if args.gaug_interval > 0 and (epoch + 1) % args.gaug_interval == 0:
+                    adj = get_adj(get_graph(data, data.gaug.T.numpy()))
+                    gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
 
             for epoch in range(args.epochs):
                 model.initialize()

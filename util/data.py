@@ -185,6 +185,11 @@ def get_graph(data, edges):
     return g
 
 
+def get_adj(g):
+    adj = nx.adjacency_matrix(g)
+    return adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
+
+
 def build_graph(data, data_split):
     if data_split in ['public', 'full']:
         data.edge_index = data.train_index
