@@ -9,7 +9,7 @@ from flag.flag_orig import apply_flag_orig, apply_orig_flag_gaug
 from gaug.gaug import GAug
 from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
-from util.data import dataset_split
+from util.data import dataset_split, get_graph, get_adj
 from util.tool import EarlyStopping
 
 
@@ -20,6 +20,7 @@ def train_flag_orig(data, model, optimizer, device, params):
     loss = apply_flag_orig(model_forward, data, optimizer, device, params)
     return loss
 
+
 def train_flag_orig_gaug(data, gaug, model, optimizer, device, params):
     forward = lambda perturb, edge: model(data.x + perturb, edge)
     model_forward = (model, forward)
@@ -27,6 +28,7 @@ def train_flag_orig_gaug(data, gaug, model, optimizer, device, params):
     loss = apply_orig_flag_gaug(model_forward, data, gaug, optimizer, device, params)
 
     return loss
+
 
 if __name__ == '__main__':
     args = get_arguments()
@@ -73,6 +75,9 @@ if __name__ == '__main__':
                     train_loss = train_flag_orig(data, model, optimizer, device, args)
                 elif args.aug_type == 'flag_orig_gaug':
                     train_loss = train_flag_orig_gaug(data, gaug, model, optimizer, device, args)
+                    if args.gaug_interval > 0 and (epoch + 1) % args.gaug_interval == 0:
+                        adj = get_adj(get_graph(data, data.gaug.T.numpy()))
+                        gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
 
                 val_loss = validate(data, model)
 
@@ -83,8 +88,8 @@ if __name__ == '__main__':
                     best_val = evals['val_f1']
                     best_test = evals['test_f1']
                     best_tr = evals['train_f1']
-                early_stopping(val_loss, model)
 
+                early_stopping(val_loss, model)
                 if early_stopping.early_stop or epoch == args.epochs - 1:
                     print(f'Train F1: {best_tr:.4f}, Validation F1: {best_val:.4f}, Test F1: {best_test:.4f}')
                     val_f1_list.append(best_val)

@@ -4,16 +4,15 @@ import numpy as np
 import torch
 from torch.optim import Adam
 
+from de.util import get_sampler
 from eval import validate, evaluate
-from gaug.original import GAug
+from flag.original import apply, apply_biased
+from gaug.gaug import GAug
 from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
 from util.data import dataset_split
-from util.tool import EarlyStopping
-from flag.original import apply, apply_biased
 from util.graph import csr_to_edgelist
-from de.util import get_sampler
-from gaug.gaug import GAug
+from util.tool import EarlyStopping
 
 
 def train(data, model, optimizer, device, args):

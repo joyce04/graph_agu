@@ -9,6 +9,7 @@
   },
   "gnn": "graphsage",
   "epochs": 150,
+  "preepochs": 0,
   "learning_rate": 0.003,
   "weight_decay": 0.0005,
   "patience": 10,
@@ -16,6 +17,7 @@
   "flag_params": {
     "m": 3,
     "step_size": 1e-3,
-    "cr": false
+    "cr": false,
+    "biased": false
   }
 }
