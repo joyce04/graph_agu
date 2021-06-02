@@ -61,12 +61,14 @@ def get_configs(args):
             args.biased = bool(config['flag_params']['biased'])
         else:
             args.biased = bool(args.biased)
-    elif args.aug_type == 'drop_edge':
+
+    if args.aug_type == 'drop_edge':
         if args.de_sampling_percent is None:
             args.de_sampling_percent = config['de_params']['de_sampling_percent']
         if args.de_normalization is None:
             args.de_normalization = config['de_params']['de_normalization']
-    elif args.aug_type in ['gaug', 'flag_orig_gaug']:
+
+    if args.aug_type in ['gaug', 'flag_orig_gaug']:
         if args.gaug_type is None:
             args.gaug_type = config['gaug_params']['gaug_type']
         if args.gaug_interval is None:

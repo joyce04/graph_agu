@@ -13,11 +13,18 @@
   "learning_rate": 0.003,
   "weight_decay": 0.0005,
   "patience": 10,
-  "aug_type": "flag_orig",
+  "aug_type": "flag_orig_gaug",
   "flag_params": {
     "m": 3,
     "step_size": 1e-3,
     "cr": false,
     "biased": false
+  },
+  "gaug_params": {
+    "gaug_type": "O",
+    "gaug_interval": 10,
+    "removal_rate": 10,
+    "add_rate": 60,
+    "m_file_loc": ""
   }
 }
