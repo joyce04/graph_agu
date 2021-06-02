@@ -48,6 +48,8 @@ if __name__ == '__main__':
     random.seed(args.seed)
     torch.manual_seed(args.seed)
     device = device_setup()
+    if device == 'gpu':
+        torch.cuda.manual_seed_all(args.seed)
     dropout = 0.5
     with open('./results/ssl_nc_{}_{}_{}_{}_es_{}.csv'.format(args.aug_type, args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
         file.write(','.join(map(lambda x: x + ':' + str(vars(args)[x]), vars(args).keys())) + '\n')

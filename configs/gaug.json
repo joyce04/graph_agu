@@ -9,13 +9,14 @@
   },
   "gnn": "graphsage",
   "epochs": 150,
+  "preepochs": 0,
   "learning_rate": 0.003,
   "weight_decay": 0.0005,
   "patience": 10,
   "aug_type": "gaug",
   "gaug_params": {
     "gaug_type": "O",
-    "gaug_interval": 10,
+    "gaug_interval": 0,
     "removal_rate": 10,
     "add_rate": 60,
     "m_file_loc": "gaug/edge_proabilities/cora_graph_5_logits.pkl"

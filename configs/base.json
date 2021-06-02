@@ -10,6 +10,7 @@
   "aug_type": "none",
   "gnn": "gcn",
   "epochs": 150,
+  "preepochs": 0,
   "learning_rate": 0.003,
   "weight_decay": 0.0005,
   "patience": 10

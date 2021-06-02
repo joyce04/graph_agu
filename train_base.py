@@ -5,6 +5,7 @@ import torch
 from torch.optim import Adam
 
 from eval import validate, evaluate
+from gaug.original import GAug
 from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
 from util.data import dataset_split
@@ -73,6 +74,8 @@ if __name__ == '__main__':
     random.seed(args.seed)
     torch.manual_seed(args.seed)
     device = device_setup()
+    if device == 'gpu':
+        torch.cuda.manual_seed_all(args.seed)
 
     with open('./results/nc_{}_{}_{}_{}_es_{}.csv'.format(args.config.replace('.json', '').replace('./configs/', ''), args.gnn, args.epochs, args.dataset, str(args.edge_split)),
               'a+') as file:
@@ -100,6 +103,7 @@ if __name__ == '__main__':
                 else:
                     gaug = GAug(False)
                     gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
+
                 dropout = 0.5
             else:
                 dropout = 0.5
