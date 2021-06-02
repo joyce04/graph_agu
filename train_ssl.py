@@ -86,15 +86,15 @@ if __name__ == '__main__':
                     train_loss = train_flag_orig(data, model, optimizer, device, args)
                 elif args.aug_type == 'flag_orig_gaug':
                     train_loss = train_flag_orig_gaug(data, gaug, model, optimizer, device, args)
+                    if args.gaug_interval > 0 and (epoch + 1) % args.gaug_interval == 0:
+                        adj = get_adj(get_graph(data, data.gaug.T.numpy()))
+                        gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
 
                 val_loss = validate(data, model)
                 # early_stopping_pre(val_loss, model)
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.8f}, Val Loss: {val_loss:.4f}')
                 # if early_stopping_pre.early_stop:
                 #     break
-                if args.gaug_interval > 0 and (epoch + 1) % args.gaug_interval == 0:
-                    adj = get_adj(get_graph(data, data.gaug.T.numpy()))
-                    gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
 
             for epoch in range(args.epochs):
                 model.initialize()
