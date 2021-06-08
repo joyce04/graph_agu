@@ -144,7 +144,7 @@ def get_unlabeled_nodes(data):
     return data
 
 
-# args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split
+# TODO WebKB : https://pytorch-geometric.readthedocs.io/en/latest/modules/datasets.html
 def dataset_split(file_loc='./dataset/', dataset_name='cora', split_type='public', subset_ratio=0.1, edge_split=False):
     if dataset_name in ['cora', 'citeseer', 'pubmed']:
         if split_type in ['public', 'full']:

@@ -113,7 +113,7 @@ if __name__ == '__main__':
     elif args.config.find('flag.json') >= 0:
         from train_base import train_flag as train
 
-    study.optimize(objective, n_trials=20)
+    study.optimize(objective, n_trials=100)
 
     with open('./results/nc_optuna_{}_{}_{}_{}_es_{}.txt'.format(args.config.replace('.json', '').replace('./configs/', ''),
                                                                  args.gnn, args.epochs, args.dataset, str(args.edge_split)), 'a+') as file:
