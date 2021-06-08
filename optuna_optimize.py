@@ -15,7 +15,7 @@ from eval import validate, evaluate
 from util.tool import EarlyStopping
 
 
-def objective(trial, dropout):
+def objective(trial):
     val_f1_list, test_f1_list, train_f1_list = [], [], []
     if args.config.find('de.json') >= 0:
         dropout = 0.8
