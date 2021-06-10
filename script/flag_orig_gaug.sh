@@ -2,9 +2,9 @@ tmux new -s base_aug -d
 tmux send-keys "source ~/.bashrc" C-m
 tmux send-keys "conda activate ocean_g" C-m
 
-code=train_base.py
+code=train.py
 dataset=cora
-config=./configs/gaug.json
+config=./configs/flag_orig_gaug.json
 gnn_type="gcn"
 gaug_type="O"
 edge_split=1
