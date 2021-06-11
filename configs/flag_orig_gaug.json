@@ -2,7 +2,7 @@
   "data_loc": "./dataset/",
   "dataset": "cora",
   "seed": 1,
-  "data_split": "full",
+  "data_split": "random",
   "subset_params": {
     "edge_split": false,
     "train_ratio": 0.01

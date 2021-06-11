@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
         val_f1_list, test_f1_list, train_f1_list = [], [], []
 
-        for r in range(5):
+        for r in range(10):
             dataset, data = dataset_split(args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split)
             num_nodes = data.x.shape[0]
             num_feats = data.x.shape[1]
