@@ -1,7 +1,7 @@
 import random
 
 import torch
-from torch_geometric.datasets import Planetoid
+from torch_geometric.datasets import Planetoid, WebKB, WikipediaNetwork
 from torch_geometric import transforms as T
 import networkx as nx
 import numpy as np
@@ -144,33 +144,39 @@ def get_unlabeled_nodes(data):
     return data
 
 
-# TODO WebKB : https://pytorch-geometric.readthedocs.io/en/latest/modules/datasets.html
 def dataset_split(file_loc='./dataset/', dataset_name='cora', split_type='public', subset_ratio=0.1, edge_split=False):
     if dataset_name in ['cora', 'citeseer', 'pubmed']:
-        if split_type in ['public', 'full']:
-            dataset = Planetoid(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures(), split=split_type)
-            data = dataset[0]
-            data = get_unlabeled_nodes(data)
-        else:
-            dataset = Planetoid(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
-            data = dataset[0]
-            data.train_mask = data.val_mask = data.test_maks = None
-            data = train_test_split_nodes(data, subset_ratio, val_ratio=0.2, test_ratio=0.2, class_balance=True)
-            if edge_split:
-                data = train_test_split_edges(data, subset_ratio, val_ratio=0.2, test_ratio=0.2)
-
-        # self-loop
-        if edge_split:
-            data.train_index = data.train_pos_edge_index
-        else:
-            data.train_index = data.edge_index
-        data.train_index = add_self_loops(data.train_index, data.num_nodes)
-        adj, deg = build_graph(data, split_type)
-        data.adj = adj
-        data.degree = deg
-        return dataset, data
+        dataset = Planetoid(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures(), split=split_type)
+    elif dataset_name in ['cornell', 'texas', 'wisconsin']:  # TODO
+        dataset = WebKB(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
+    elif dataset_name in ['chameleon', 'squirrel']:
+        dataset = WikipediaNetwork(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
     else:
-        raise Exception('Given dataset not available...')
+        raise Exception('dataset not available...')
+
+    if split_type == 'public':
+        data = dataset[0]
+        data = get_unlabeled_nodes(data)
+    elif split_type == 'full':
+        data = dataset[0]
+    else:
+        # dataset = Planetoid(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
+        data = dataset[0]
+        data.train_mask = data.val_mask = data.test_maks = None
+        data = train_test_split_nodes(data, subset_ratio, val_ratio=0.2, test_ratio=0.2, class_balance=True)
+        if edge_split:
+            data = train_test_split_edges(data, subset_ratio, val_ratio=0.2, test_ratio=0.2)
+
+    # self-loop
+    if edge_split:
+        data.train_index = data.train_pos_edge_index
+    else:
+        data.train_index = data.edge_index
+    data.train_index = add_self_loops(data.train_index, data.num_nodes)
+    adj, deg = build_graph(data, split_type)
+    data.adj = adj
+    data.degree = deg
+    return dataset, data
 
 
 def add_self_loops(edge_index, num_nodes):

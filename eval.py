@@ -11,6 +11,14 @@ def validate(data, model):
     return model.loss(out[data.val_mask == 1], data.y[data.val_mask == 1])
 
 
+@torch.no_grad()
+def validate(data, model, lap, d_inv):
+    model.evaluate()
+
+    out = model(data.x, data.train_index, lap, d_inv)
+    return model.loss(out[data.val_mask == 1], data.y[data.val_mask == 1])
+
+
 # @torch.no_grad()
 # def validate_sage(data, model, subgraph_loader, device):
 #     model.evaluate()
@@ -43,6 +51,13 @@ def evaluate(model, data, device):
 
     return evaluate_metrics(data, out, device)
 
+
+@torch.no_grad()
+def evaluate(model, data, device, lap, d_inv):
+    model.evaluate()
+    out = model(data.x, data.train_index, lap, d_inv)
+
+    return evaluate_metrics(data, out, device)
 
 # @torch.no_grad()
 # def evaluate_sage(model, data, subgraph_loader, device):
