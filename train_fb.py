@@ -17,7 +17,6 @@ from util.tool import EarlyStopping
 
 def train(data, model, optimizer, device, args, lap, d_inv):
     optimizer.zero_grad()
-
     out = model(data.x, data.train_index, lap, d_inv)
     loss = model.loss(out[data.train_mask == 1], data.y[data.train_mask == 1])
     loss.backward()
@@ -118,9 +117,10 @@ if __name__ == '__main__':
             best_test, best_val, best_tr = 0, 0, 0
             lowest_val_loss = float("inf")
 
-            data.x = data.x.to(device)
-            data.train_index = data.train_index.to(device)
-            data.y = data.y.to(device)
+            model = model.to(device)
+            data = data.to(device)
+            lap = lap.to(device)
+            d_inv = d_inv.to(device)
             for epoch in range(args.epochs):
                 model.initialize()
                 # if args.config.find('flag.json') >= 0:

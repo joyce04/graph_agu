@@ -1,7 +1,7 @@
 import networkx as nx
 import scipy
 import torch
-from torch import zeros, from_numpy
+from torch import zeros, from_numpy, eye
 from tqdm import tqdm
 
 
@@ -11,7 +11,7 @@ def csr_to_edgelist(matrix):
 
 
 def lap_dinv(edge_index, num_nodes):
-    adj = zeros((num_nodes, num_nodes))
+    adj = eye((num_nodes))
     degree = zeros((num_nodes, num_nodes))
     for i in tqdm(range(edge_index.shape[1])):
         first = edge_index[0][i]
