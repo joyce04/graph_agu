@@ -1,6 +1,7 @@
 from torch import nn as nn
 
 from gnn.fbgcn import FBGCN
+from gnn.fbgat import FBGAT
 from gnn.gat import GAT
 from gnn.gcn import GCN
 from gnn.sage import SAGE
@@ -38,4 +39,6 @@ def generate_node_clf(gnn_type, num_feats, num_nd_classes, dropout, device):
         gnn = GAT(8, num_feats, 8, num_nd_classes, dropout).to(device)
     elif gnn_type == 'fbgcn':
         gnn = FBGCN(2, num_feats, 128, num_nd_classes, dropout).to(device)#
+    elif gnn_type == 'fbgat':
+        gnn = FBGAT(8, num_feats, 8, num_nd_classes, dropout)
     return NodeClassifier(gnn, nn.CrossEntropyLoss().to(device))

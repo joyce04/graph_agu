@@ -106,7 +106,7 @@ if __name__ == '__main__':
             else:
                 dropout = 0.5
 
-            if args.gnn == 'fbgcn':
+            if args.gnn == 'fbgcn' or args.gnn == 'fbgat':
                 lap, d_inv = lap_dinv(data.edge_index, num_nodes)
 
             model = generate_node_clf(args.gnn, num_feats, num_nd_classes, dropout, device)
