@@ -1,4 +1,4 @@
-from torch import mm, nn, rand
+from torch import mm, nn, rand, tensor
 from torch_geometric.nn import GATConv
 import torch.nn.functional as F
 
@@ -14,8 +14,10 @@ class FBGAT_Layer(nn.Module):
         gain = nn.init.calculate_gain("relu")
         nn.init.xavier_normal_(self.high.weight, gain)
         
-        self.aL = nn.Parameter(rand(1))
-        self.aH = nn.Parameter(rand(1))
+        # self.aL = nn.Parameter(rand(1))
+        # self.aH = nn.Parameter(rand(1))
+        self.aL = nn.Parameter(tensor(0.862))
+        self.aH = nn.Parameter(tensor(0.288))
 
         self.gat.reset_parameters()
 
@@ -54,4 +56,4 @@ class FBGAT(nn.Module):
         x = F.elu(self.fbgats[0](x, edge_index, lap, d_inv))
         x = F.dropout(x, p=self.dropout, training=self.training)
         # last layer
-        return F.log_softmax(self.fbgats[-1](x, edge_index, lap, d_inv))
+        return F.log_softmax(self.fbgats[-1](x, edge_index, lap, d_inv), dim=1)

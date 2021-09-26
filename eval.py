@@ -12,7 +12,7 @@ def validate(data, model):
 
 
 @torch.no_grad()
-def validate(data, model, lap, d_inv):
+def validate_fb(data, model, lap, d_inv):
     model.evaluate()
 
     out = model(data.x, data.train_index, lap, d_inv)
@@ -53,7 +53,7 @@ def evaluate(model, data, device):
 
 
 @torch.no_grad()
-def evaluate(model, data, device, lap, d_inv):
+def evaluate_fb(model, data, device, lap, d_inv):
     model.evaluate()
     out = model(data.x, data.train_index, lap, d_inv)
 

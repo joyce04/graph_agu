@@ -47,3 +47,4 @@ class GCN(nn.Module):
 
         # last layer
         return self.gcns[self.num_layers - 1](x, edge_index)
+    

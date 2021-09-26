@@ -1,5 +1,5 @@
 from torch import nn as nn
-
+from torch import is_tensor
 from gnn.fbgcn import FBGCN
 from gnn.fbgat import FBGAT
 from gnn.gat import GAT
@@ -23,8 +23,11 @@ class NodeClassifier(nn.Module):
     def reset_parameters(self):
         self.gnn_model.reset_parameters()
 
-    def forward(self, x, adj, lap, d_inv):
-        return self.gnn_model(x, adj, lap, d_inv)
+    def forward(self, x, adj, lap = 0, d_inv = 0):
+        if(is_tensor(lap)):
+            return self.gnn_model(x,adj,lap, d_inv)
+        else:
+            return self.gnn_model(x, adj)
 
     def loss(self, scores, labels):
         return self.loss_fcn(scores, labels)
@@ -38,7 +41,7 @@ def generate_node_clf(gnn_type, num_feats, num_nd_classes, dropout, device):
     elif gnn_type == 'gat':
         gnn = GAT(8, num_feats, 8, num_nd_classes, dropout).to(device)
     elif gnn_type == 'fbgcn':
-        gnn = FBGCN(2, num_feats, 128, num_nd_classes, dropout).to(device)#
+        gnn = FBGCN(2, num_feats, 128, num_nd_classes, dropout).to(device)
     elif gnn_type == 'fbgat':
-        gnn = FBGAT(8, num_feats, 8, num_nd_classes, dropout)
+        gnn = FBGAT(8, num_feats, 8, num_nd_classes, dropout).to(device)
     return NodeClassifier(gnn, nn.CrossEntropyLoss().to(device))

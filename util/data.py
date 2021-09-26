@@ -154,15 +154,17 @@ def dataset_split(file_loc='./dataset/', dataset_name='cora', split_type='public
     else:
         raise Exception('dataset not available...')
 
+    data = dataset[0]
+    if dataset_name in  ['cornell', 'texas', 'wisconsin','chameleon', 'squirrel']:
+        data.train_mask,  data.val_mask, data.test_mask = semi_masks(data.y)
     if split_type == 'public':
-        data = dataset[0]
-        data = get_unlabeled_nodes(data)
+        # data = get_unlabeled_nodes(data) 
+        pass
     elif split_type == 'full':
-        data = dataset[0]
+        pass
     else:
         # dataset = Planetoid(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
-        data = dataset[0]
-        data.train_mask = data.val_mask = data.test_maks = None
+        data.train_mask = data.val_mask =  data.val_mask = None
         data = train_test_split_nodes(data, subset_ratio, val_ratio=0.2, test_ratio=0.2, class_balance=True)
         if edge_split:
             data = train_test_split_edges(data, subset_ratio, val_ratio=0.2, test_ratio=0.2)
@@ -205,3 +207,35 @@ def build_graph(data, data_split):
     adj = nx.adjacency_matrix(g)
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
     return adj, np.sum(adj, axis=1)
+
+def semi_masks(y, train_ratio = 0.05, val_ratio = 0.2, test_ratio = 0.4):
+    num_class = len(torch.unique(y))
+    num_nodes = len(y)
+    train_mask = torch.zeros(num_nodes)
+    test_mask = torch.zeros(num_nodes)
+    val_mask = torch.zeros(num_nodes)
+
+    val_size = int(num_nodes*val_ratio)
+    test_size = int(num_nodes*test_ratio)
+    # 5% of the nodes would be labelled, +1 for int truncation
+    train_size = int(num_nodes*train_ratio/num_class)+1
+    for i in range(num_class):
+        # each class would have a fixed number of nodes being labelled
+        train_index = (y == i).nonzero(as_tuple = True)[0]
+        # the selected index would be marked as True
+        selected_train_index = torch.randperm(n = len(train_index))
+        for j in selected_train_index[:train_size]:
+            train_mask[train_index[j]] = True
+    
+    excluded_idx_train = train_mask.nonzero(as_tuple=True)[0]
+    temp = [i for i in range(num_nodes) if i not in excluded_idx_train]
+    selected_val_index = torch.randperm(n = len(temp))
+    for i in selected_val_index[:val_size]:
+        val_mask[temp[i]] = True
+    excluded_idx_val = val_mask.nonzero(as_tuple=True)[0]
+    temp = [i for i in range(num_nodes) if i not in excluded_idx_train and i not in excluded_idx_val]
+    selected_test_index = torch.randperm(n = len(temp))
+    for i in selected_test_index[:test_size]:
+        test_mask[temp[i]] = True
+
+    return (train_mask, val_mask, test_mask)   
