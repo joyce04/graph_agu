@@ -12,10 +12,10 @@ def validate(data, model):
 
 
 @torch.no_grad()
-def validate_fb(data, model, lap, d_inv):
+def validate_fb(data, model,lsym):
     model.evaluate()
 
-    out = model(data.x, data.train_index, lap, d_inv)
+    out = model(data.x, data.train_index,lsym)
     return model.loss(out[data.val_mask == 1], data.y[data.val_mask == 1])
 
 
@@ -53,9 +53,9 @@ def evaluate(model, data, device):
 
 
 @torch.no_grad()
-def evaluate_fb(model, data, device, lap, d_inv):
+def evaluate_fb(model, data, device, lsym):
     model.evaluate()
-    out = model(data.x, data.train_index, lap, d_inv)
+    out = model(data.x, data.train_index, lsym)
 
     return evaluate_metrics(data, out, device)
 

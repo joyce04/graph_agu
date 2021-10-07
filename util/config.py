@@ -48,7 +48,7 @@ def get_configs(args):
     if args.aug_type is None:
         args.aug_type = config['aug_type']
 
-    if args.aug_type in ['flag', 'flag_orig', 'flag_orig_gaug']:
+    if args.aug_type in ['flag', 'flag_orig', 'flag_orig_gaug', "flag_group"]:
         if args.m is None:
             args.m = config['flag_params']['m']
         if args.step_size is None:
@@ -79,7 +79,16 @@ def get_configs(args):
             args.add_rate = config['gaug_params']['add_rate']
         if args.m_file_loc is None:
             args.m_file_loc = config['gaug_params']['m_file_loc']
-
+    if args.aug_type in ["grand", "flag_group"]:
+        if args.sample is None:
+            args.sample = config["sample"]
+        if args.order is None:
+            args.order = config["order"]
+        if args.tem is None:
+            args.tem = config["tem"]
+        if args.lam is None:
+            args.lam = config["lam"]
+            
     return args
 
 
@@ -110,7 +119,10 @@ def get_arguments():
     parser.add_argument('--removal_rate', type=float, help='edge removal rate')
     parser.add_argument('--add_rate', type=float, help='edge add rate')
     parser.add_argument('--m_file_loc', help='vae trained file location for G-Aug M')
-
+    parser.add_argument('--sample', type = int, help = "The number of samples for GRAND rand_prop")
+    parser.add_argument('--order', type = int, help = 'Depth of random propagation for GRAND')
+    parser.add_argument('--tem', type = float, help = 'Factor that determines the sharpness of distributions in calculating cr for GRAND')
+    parser.add_argument('--lam', type = int, help = 'Factor that determines the relative importance of cr loss for GRAND')
     args = parser.parse_args()
     args = get_configs(args)
     return args

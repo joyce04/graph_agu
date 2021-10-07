@@ -6,6 +6,7 @@ from torch.optim import Adam
 
 from eval import validate, evaluate
 from flag.flag_orig import apply_flag_orig, apply_orig_flag_gaug
+from flag.flag_group import apply_flag_group
 from gaug.gaug import GAug
 from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
@@ -27,6 +28,13 @@ def train_flag_orig_gaug(data, gaug, model, optimizer, device, params):
 
     loss = apply_orig_flag_gaug(model_forward, data, gaug, optimizer, device, params)
 
+    return loss
+
+def train_flag_group(data, model, optimizer, device, params):
+    forward = lambda perturb: model(data.x + perturb, data.train_index)
+    model_forward = (model, forward)
+
+    loss = apply_flag_group(model_forward, data, optimizer, device, params)
     return loss
 
 
@@ -78,7 +86,8 @@ if __name__ == '__main__':
                     if args.gaug_interval > 0 and (epoch + 1) % args.gaug_interval == 0:
                         adj = get_adj(get_graph(data, data.gaug.T.numpy()))
                         gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
-
+                elif args.aug_type =="flag_group" :
+                    train_loss = train_flag_group(data, model, optimizer, device, args)
                 val_loss = validate(data, model)
 
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')

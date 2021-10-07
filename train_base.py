@@ -13,6 +13,7 @@ from util.config import get_arguments, device_setup
 from util.data import dataset_split
 from util.graph import csr_to_edgelist
 from util.tool import EarlyStopping
+from grand.util import adj_for_rand_propagate, rand_prop, consis_loss
 
 
 def train(data, model, optimizer, device, args):
@@ -64,6 +65,25 @@ def train_gaug(data, gaug, model, optimizer, device):
 
     return loss
 
+def train_grand(data, model, optimizer, device, K, tem, lam, order):
+    optimizer.zero_grad()
+    x = data.x
+    A = adj_for_rand_propagate(data.adj)
+    x_list = []
+    out_list = []
+    loss = 0
+    for k in range(K):
+        x_list.append(rand_prop(x, order, A))
+        out_list.append(torch.log_softmax(model(x_list[k], data.train_index), dim = -1))
+        loss += model.loss(out_list[k][data.train_mask == 1], data.y[data.train_mask == 1])
+    loss = loss/K
+    loss_consis = consis_loss(out_list, temp = tem, lam = lam)
+    loss = loss + loss_consis
+    
+    loss.backward()
+    optimizer.step()
+
+    return loss
 
 if __name__ == '__main__':
     args = get_arguments()
@@ -128,6 +148,8 @@ if __name__ == '__main__':
                     train_loss = train_de(data, model, optimizer, device, sampler, args.de_sampling_percent, args.de_normalization)
                 elif args.config.find('gaug.json') >= 0:
                     train_loss = train_gaug(data, gaug, model, optimizer, device)
+                elif args.config.find('grand.json') >= 0:
+                    train_loss = train_grand(data, model, optimizer, device, args.sample, args.tem, args.lam, args.order)
                 val_loss = validate(data, model)
 
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
@@ -144,6 +166,8 @@ if __name__ == '__main__':
                     val_f1_list.append(best_val)
                     train_f1_list.append(best_tr)
                     test_f1_list.append(best_test)
+                    if r == 9:
+                        torch.save(model.state_dict(), "saved_model/" + str(args.dataset))
                     break
 
             # file.write(f'{r + 1},{epoch},{best_tr:.4f},{best_val:.4f},{best_test:.4f}\n')

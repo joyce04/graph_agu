@@ -1,13 +1,13 @@
 import random
 
 import torch
-from torch_geometric.datasets import Planetoid, WebKB, WikipediaNetwork
+from torch_geometric.datasets import Planetoid, WebKB, WikipediaNetwork, Actor
 from torch_geometric import transforms as T
 import networkx as nx
 import numpy as np
 from torch_geometric.utils.convert import to_networkx
 import math
-
+from util.graph import homophily_measure
 
 def train_test_split_nodes(data, train_ratio=0.2, val_ratio=0.05, test_ratio=0.1, class_balance=True):
     r"""Splits nodes into train, val, test masks
@@ -151,33 +151,37 @@ def dataset_split(file_loc='./dataset/', dataset_name='cora', split_type='public
         dataset = WebKB(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
     elif dataset_name in ['chameleon', 'squirrel']:
         dataset = WikipediaNetwork(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
+    elif dataset_name in ['actor']:
+        dataset = Actor(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
     else:
         raise Exception('dataset not available...')
 
-    data = dataset[0]
+    data = dataset[0]   
     if dataset_name in  ['cornell', 'texas', 'wisconsin','chameleon', 'squirrel']:
         data.train_mask,  data.val_mask, data.test_mask = semi_masks(data.y)
-    if split_type == 'public':
-        # data = get_unlabeled_nodes(data) 
-        pass
-    elif split_type == 'full':
-        pass
-    else:
-        # dataset = Planetoid(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
-        data.train_mask = data.val_mask =  data.val_mask = None
-        data = train_test_split_nodes(data, subset_ratio, val_ratio=0.2, test_ratio=0.2, class_balance=True)
-        if edge_split:
-            data = train_test_split_edges(data, subset_ratio, val_ratio=0.2, test_ratio=0.2)
+    # if split_type == 'public':
+    #     # data = get_unlabeled_nodes(data) 
+    #     pass
+    # elif split_type == 'full':
+    #     pass
+    # else:
+    #     # dataset = Planetoid(root=file_loc, name=dataset_name, transform=T.NormalizeFeatures())
+    #     data.train_mask = data.val_mask =  data.val_mask = None
+    #     data = train_test_split_nodes(data, subset_ratio, val_ratio=0.2, test_ratio=0.2, class_balance=True)
+    #     if edge_split:
+    #         data = train_test_split_edges(data, subset_ratio, val_ratio=0.2, test_ratio=0.2)
 
     # self-loop
-    if edge_split:
-        data.train_index = data.train_pos_edge_index
-    else:
-        data.train_index = data.edge_index
+    # if edge_split:
+    #     data.train_index = data.train_pos_edge_index
+    # else:
+    data.train_index = data.edge_index
     data.train_index = add_self_loops(data.train_index, data.num_nodes)
-    adj, deg = build_graph(data, split_type)
+    adj, deg, Lsym = build_graph(data, split_type)
     data.adj = adj
     data.degree = deg
+    data.aL, data.aH = homophily_measure(data)
+    data.lsym = csr_to_sparse(Lsym)
     return dataset, data
 
 
@@ -204,9 +208,21 @@ def build_graph(data, data_split):
         g = to_networkx(data, to_undirected=True)
     else:
         g = get_graph(data, data.train_index.T.numpy())
+    Lsym = nx.linalg.laplacianmatrix.normalized_laplacian_matrix(g)
     adj = nx.adjacency_matrix(g)
     adj = adj + adj.T.multiply(adj.T > adj) - adj.multiply(adj.T > adj)
-    return adj, np.sum(adj, axis=1)
+    return adj, np.sum(adj, axis=1), Lsym
+
+def csr_to_sparse(csr):
+    csr = csr.tocoo().astype(np.float32)
+    indices = torch.from_numpy(
+    np.vstack(
+        (csr.row, csr.col)).astype(np.int64)
+    )
+    values = torch.from_numpy(csr.data)
+    shape = torch.Size(csr.shape)
+    sparse = torch.sparse.FloatTensor(indices, values, shape)
+    return sparse
 
 def semi_masks(y, train_ratio = 0.05, val_ratio = 0.2, test_ratio = 0.4):
     num_class = len(torch.unique(y))

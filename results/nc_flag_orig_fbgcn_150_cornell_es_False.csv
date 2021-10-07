@@ -1,9 +1,0 @@
-config:./configs/flag_orig.json,data_loc:./dataset/,dataset:cornell,data_split:public,train_ratio:None,edge_split:False,epochs:150,preepochs:0,gnn:fbgcn,seed:1,learning_rate:0.003,weight_decay:0.0005,patience:10,aug_type:flag_orig,m:3,step_size:0.001,biased:False,cr:False,de_sampling_percent:None,de_normalization:None,gaug_type:None,gaug_interval:None,removal_rate:None,add_rate:None,m_file_loc:None
-run, train F1 avg, validation F1 avg, test F1 avg
-total,0.8556, 0.2417,0.2315
-config:./configs/flag_orig.json,data_loc:./dataset/,dataset:cornell,data_split:public,train_ratio:None,edge_split:False,epochs:150,preepochs:0,gnn:fbgcn,seed:1,learning_rate:0.003,weight_decay:0.0005,patience:10,aug_type:flag_orig,m:3,step_size:0.001,biased:False,cr:True,de_sampling_percent:None,de_normalization:None,gaug_type:None,gaug_interval:None,removal_rate:None,add_rate:None,m_file_loc:None
-run, train F1 avg, validation F1 avg, test F1 avg
-total,0.8889, 0.2472,0.2329
-config:./configs/flag_orig.json,data_loc:./dataset/,dataset:cornell,data_split:public,train_ratio:None,edge_split:False,epochs:150,preepochs:0,gnn:fbgcn,seed:1,learning_rate:0.003,weight_decay:0.0005,patience:10,aug_type:flag_orig,m:3,step_size:0.001,biased:False,cr:True,de_sampling_percent:None,de_normalization:None,gaug_type:None,gaug_interval:None,removal_rate:None,add_rate:None,m_file_loc:None
-run, train F1 avg, validation F1 avg, test F1 avg
-total,0.8556, 0.2417,0.2315

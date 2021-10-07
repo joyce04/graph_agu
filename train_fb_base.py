@@ -2,30 +2,30 @@ import random
 
 import numpy as np
 import torch
+from torch import optim
 from torch.optim import Adam
 
-from de.util import get_sampler
+# from de.util import get_sampler
 from eval import validate_fb, evaluate_fb
 from flag.original import apply, apply_biased
-from gaug.gaug import GAug
+# from gaug.gaug import GAug
 from gnn.clf import generate_node_clf
 from util.config import get_arguments, device_setup
 from util.data import dataset_split
-from util.graph import csr_to_edgelist, lap_dinv
 from util.tool import EarlyStopping
+from grand.util import adj_for_rand_propagate, rand_prop, consis_loss
 
-
-def train(data, model, optimizer, device, args, lap, d_inv):
+def train(data, model, optimizer, device, args, lsym):
     optimizer.zero_grad()
-    out = model(data.x, data.train_index, lap, d_inv)
+    out = model(data.x, data.train_index, lsym)
     loss = model.loss(out[data.train_mask == 1], data.y[data.train_mask == 1])
     loss.backward()
     optimizer.step()
     return loss
 
 
-def train_flag(data, model, optimizer, device, args, lap, d_inv):
-    forward = lambda perturb: model(data.x + perturb, data.train_index, lap, d_inv)
+def train_flag(data, model, optimizer, device, args, lsym):
+    forward = lambda perturb: model(data.x + perturb, data.train_index, lsym)
     model_forward = (model, forward)
     if args.biased:
         loss = apply_biased(model_forward, data, optimizer, device, args)
@@ -34,37 +34,27 @@ def train_flag(data, model, optimizer, device, args, lap, d_inv):
     return loss
 
 
-def train_de(data, model, optimizer, device, sampler, sampling_percent, normalization):
-    (train_adj, train_fea) = sampler.randomedge_sampler(percent=sampling_percent, normalization=normalization, cuda=(device == 'cuda'))
-    data.x = torch.Tensor(train_fea).to(device)
-    sampler.train_features = train_fea
-    edges = csr_to_edgelist(train_adj).type(torch.int64)
-    lap, d_inv = lap_dinv(edges, data.x.shape[0])
-    lap = lap.to(device)
-    d_inv = d_inv.to(device)
 
+
+def train_grand(data, model, optimizer, device, lsym, K, tem, lam, order):
     optimizer.zero_grad()
-
-    out = model(data.x, edges.to(device), lap, d_inv)
-    loss = model.loss(out[data.train_mask == 1], data.y[data.train_mask == 1])
-
+    x = data.x
+    A = adj_for_rand_propagate(data.adj)
+    x_list = []
+    out_list = []
+    loss = 0
+    for k in range(K):
+        x_list.append(rand_prop(x, order, A))
+        out_list.append(torch.log_softmax(model(x_list[k], data.train_index, lsym), dim = -1))
+        loss += model.loss(out_list[k][data.train_mask == 1], data.y[data.train_mask == 1])
+    loss = loss/K
+    loss_consis = consis_loss(out_list, temp = tem, lam = lam)
+    loss = loss + loss_consis
+    
     loss.backward()
     optimizer.step()
 
     return loss
-
-
-def train_gaug(data, gaug, model, optimizer, device, lap, d_inv):
-    optimizer.zero_grad()
-    updated_edges = gaug.updated_edges
-    out = model(data.x, updated_edges, lap, d_inv)
-    loss = model.loss(out[data.train_mask == 1], data.y[data.train_mask == 1])
-
-    loss.backward()
-    optimizer.step()
-
-    return loss
-
 
 if __name__ == '__main__':
     args = get_arguments()
@@ -84,31 +74,14 @@ if __name__ == '__main__':
 
         val_f1_list, test_f1_list, train_f1_list = [], [], []
 
-        for r in range(10):
+        for r in range(3):
             dataset, data = dataset_split(args.data_loc, args.dataset, args.data_split, args.train_ratio, args.edge_split)
             num_nodes = data.x.shape[0]
             num_feats = data.x.shape[1]
             num_nd_classes = int(np.max(data.y.numpy()) + 1)
 
-            if args.config.find('de.json') >= 0:
-                sampler, data = get_sampler(data, data.adj, device)
-                if args.gnn == 'gat':
-                    dropout = 0.5
-                else:
-                    dropout = 0.8
-            elif args.config.find('gaug.json') >= 0:
-                if args.gaug_type == 'M':
-                    gaug = GAug(True)
-                    gaug.get_pretrained_edges(data, args.m_file_loc, args.removal_rate, args.add_rate)
-                else:
-                    gaug = GAug(False)
-                    gaug.train_predict_edges(data.adj, data.x, data.y, device, 30, args.removal_rate, args.add_rate)
-
-                dropout = 0.5
-            else:
-                dropout = 0.5
-            
-            model = generate_node_clf(args.gnn, num_feats, num_nd_classes, dropout, device)
+            dropout = 0.5
+            model = generate_node_clf(args.gnn, num_feats, num_nd_classes, dropout, device, data.aL, data.aH)
             model.reset_parameters()
             optimizer = Adam(model.gnn_model.parameters(), lr=args.learning_rate, weight_decay=args.weight_decay)
             early_stopping = EarlyStopping(patience=args.patience, verbose=True)
@@ -117,31 +90,21 @@ if __name__ == '__main__':
             lowest_val_loss = float("inf")
             model = model.to(device)
             data = data.to(device)
-            if(args.config.find('gaug.json') >= 0):
-                lap, d_inv = lap_dinv(gaug.updated_edges, num_nodes)
-                lap = lap.to(device)
-                d_inv = d_inv.to(device)
-            else:
-                lap, d_inv = lap_dinv(data.edge_index, num_nodes)
-                lap = lap.to(device)
-                d_inv = d_inv.to(device)
             
             for epoch in range(args.epochs):
                 model.initialize()
                 if args.config.find('flag.json') >= 0:
-                    train_loss = train_flag(data, model, optimizer, device, args, lap, d_inv)
+                    train_loss = train_flag(data, model, optimizer, device, args, data.lsym)
                 if args.config.find('base.json') >= 0:
-                    train_loss = train(data, model, optimizer, device, args, lap, d_inv)
-                elif args.config.find('de.json') >= 0:
-                    train_loss = train_de(data, model, optimizer, device, sampler, args.de_sampling_percent, args.de_normalization)
-                elif args.config.find('gaug.json') >= 0:
-                    train_loss = train_gaug(data, gaug, model, optimizer, device, lap, d_inv)
-                val_loss = validate_fb(data, model, lap, d_inv)
+                    train_loss = train(data, model, optimizer, device, args,  data.lsym)
+                elif args.config.find('grand.json') >= 0:
+                    train_loss = train_grand(data, model, optimizer, device, data.lsym, args.sample, args.tem, args.lam, args.order)
+                val_loss = validate_fb(data, model, data.lsym)
 
                 print(f'Run: {r + 1}, Epoch: {epoch:02d}, Loss: {train_loss:.4f}')
                 if lowest_val_loss > val_loss or epoch == args.epochs - 1:
                     lowest_val_loss = val_loss
-                    evals = evaluate_fb(model, data, device, lap, d_inv)
+                    evals = evaluate_fb(model, data, device, data.lsym)
                     best_val = evals['val_f1']
                     best_test = evals['test_f1']
                     best_tr = evals['train_f1']

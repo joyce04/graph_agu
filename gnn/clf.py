@@ -23,9 +23,9 @@ class NodeClassifier(nn.Module):
     def reset_parameters(self):
         self.gnn_model.reset_parameters()
 
-    def forward(self, x, adj, lap = 0, d_inv = 0):
-        if(is_tensor(lap)):
-            return self.gnn_model(x,adj,lap, d_inv)
+    def forward(self, x, adj, lsym = 0):
+        if(is_tensor(lsym)):
+            return self.gnn_model(x,adj,lsym)
         else:
             return self.gnn_model(x, adj)
 
@@ -33,7 +33,7 @@ class NodeClassifier(nn.Module):
         return self.loss_fcn(scores, labels)
 
 
-def generate_node_clf(gnn_type, num_feats, num_nd_classes, dropout, device):
+def generate_node_clf(gnn_type, num_feats, num_nd_classes, dropout, device, aL = 0, aH = 0):
     if gnn_type == 'gcn':
         gnn = GCN(2, num_feats, 128, num_nd_classes, dropout).to(device)
     elif gnn_type == 'graphsage':
@@ -41,7 +41,7 @@ def generate_node_clf(gnn_type, num_feats, num_nd_classes, dropout, device):
     elif gnn_type == 'gat':
         gnn = GAT(8, num_feats, 8, num_nd_classes, dropout).to(device)
     elif gnn_type == 'fbgcn':
-        gnn = FBGCN(2, num_feats, 128, num_nd_classes, dropout).to(device)
+        gnn = FBGCN(2, num_feats, 128, num_nd_classes, dropout, aL, aH).to(device)
     elif gnn_type == 'fbgat':
-        gnn = FBGAT(8, num_feats, 8, num_nd_classes, dropout).to(device)
+        gnn = FBGAT(8, num_feats, 8, num_nd_classes, dropout, aL, aH).to(device)
     return NodeClassifier(gnn, nn.CrossEntropyLoss().to(device))

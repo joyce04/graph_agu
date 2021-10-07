@@ -58,7 +58,7 @@ def apply_orig_flag_gaug(model_forward, data, gaug, optimizer, device, args):
     return loss
 
 
-def apply_flag_orig(model_forward, data, optimizer, device, args, lap, d_inv):
+def apply_flag_orig(model_forward, data, optimizer, device, args,lsym):
     # THRESHOLD = params['THRESHOLD']
     m = args.m
     step_size = args.step_size
@@ -70,7 +70,7 @@ def apply_flag_orig(model_forward, data, optimizer, device, args, lap, d_inv):
     model.train()
     optimizer.zero_grad()
 
-    node_cls = model(data.x, data.train_index, lap, d_inv)
+    node_cls = model(data.x, data.train_index,lsym)
 
     # condition = data.ul_train_mask == 1
     loss = model.loss(node_cls[train_idx], data.y[train_idx]) / (m + 1)

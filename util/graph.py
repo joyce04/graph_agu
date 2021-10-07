@@ -1,8 +1,6 @@
 import networkx as nx
-import scipy
 import torch
-from torch import zeros, from_numpy, eye
-from tqdm import tqdm
+from torch_geometric.utils import to_networkx
 
 
 def csr_to_edgelist(matrix):
@@ -10,17 +8,26 @@ def csr_to_edgelist(matrix):
     return torch.tensor([e for e in g.edges()]).T
 
 
-def lap_dinv(edge_index, num_nodes):
-    adj = eye((num_nodes))
-    degree = zeros((num_nodes, num_nodes))
-    for i in tqdm(range(edge_index.shape[1])):
-        first = edge_index[0][i]
-        second = edge_index[1][i]
-        adj[first][second] = 1
-        adj[second][first] = 1
-    for i in tqdm(range(num_nodes)):
-        degree[i][i] = sum(adj[i][:])
-    lap = degree - adj
-    inter = scipy.linalg.fractional_matrix_power(degree, (-1 / 2))
-    d_inv = from_numpy(inter)
-    return (lap, d_inv)
+def homophily_measure(data):
+    # graph = to_networkx(data, to_undirected=True, node_attrs=['y'])
+    # homophily = 0
+    # for node in graph.nodes:
+    #     smth = 0
+    #     self_loop = False
+    #     for neigh in graph.neighbors(node):
+    #         if neigh == node:
+    #             self_loop = True
+    #             continue
+    #         if graph.nodes[node]['y'] == graph.nodes[neigh]['y']:
+    #             smth += 1
+    #     num_neigh = graph.degree(node)
+    #     if self_loop == True:
+    #         self_loop = False
+    #         num_neigh = num_neigh - 1
+    #     if num_neigh == 0:
+    #         smth_rate = 0
+    #     else:
+    #         smth_rate = smth / num_neigh
+    #     homophily = homophily + smth_rate
+    # homophily = homophily / data.num_nodes
+    return 1., 1.

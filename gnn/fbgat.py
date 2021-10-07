@@ -14,10 +14,8 @@ class FBGAT_Layer(nn.Module):
         gain = nn.init.calculate_gain("relu")
         nn.init.xavier_normal_(self.high.weight, gain)
         
-        # self.aL = nn.Parameter(rand(1))
-        # self.aH = nn.Parameter(rand(1))
-        self.aL = nn.Parameter(tensor(0.862))
-        self.aH = nn.Parameter(tensor(0.288))
+        self.aL = nn.Parameter(rand(1))
+        self.aH = nn.Parameter(rand(1))
 
         self.gat.reset_parameters()
 
